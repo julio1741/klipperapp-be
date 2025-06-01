@@ -7,4 +7,13 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+  namespace :api do
+    namespace :v1 do
+      resources :organizations do
+        collection do
+          get 'slug/:slug', to: 'organizations#find_by_slug', as: :find_by_slug
+        end
+      end
+    end
+  end
 end
