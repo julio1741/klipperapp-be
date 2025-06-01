@@ -1,6 +1,7 @@
 module Api
   module V1
     class ProfilesController < ApplicationController
+      before_action :authorize_request
       before_action :set_profile, only: [:show, :update, :destroy]
 
       def index

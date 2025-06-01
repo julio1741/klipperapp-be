@@ -20,6 +20,8 @@ Rails.application.routes.draw do
           get 'slug/:slug', to: 'organizations#find_by_slug', as: :find_by_slug
         end
       end
+      post 'login', to: 'auth#login'
+      get 'me', to: 'auth#me'
     end
   end
 end

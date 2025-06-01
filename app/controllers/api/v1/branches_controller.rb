@@ -1,6 +1,7 @@
 module Api
   module V1
     class BranchesController < ApplicationController
+      before_action :authorize_request
       before_action :set_branch, only: [:show, :update, :destroy]
 
       def index

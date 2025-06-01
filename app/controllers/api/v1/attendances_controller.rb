@@ -1,6 +1,7 @@
 module Api
   module V1
     class AttendancesController < ApplicationController
+      before_action :authorize_request
       before_action :set_attendance, only: [:show, :update, :destroy]
 
       # GET /api/v1/attendances
