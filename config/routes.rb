@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   # root "posts#index"
   namespace :api do
     namespace :v1 do
+      resources :branches
       resources :organizations do
         collection do
           get 'slug/:slug', to: 'organizations#find_by_slug', as: :find_by_slug
