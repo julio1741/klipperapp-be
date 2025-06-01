@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :branches
       resources :profiles
+      resources :services
       resources :organizations do
         collection do
           get 'slug/:slug', to: 'organizations#find_by_slug', as: :find_by_slug

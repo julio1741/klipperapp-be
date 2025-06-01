@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  description: MyText
+  organization: one
+  price: 9.99
+  branch: one
+  duration: 1
+  active: false
+
+two:
+  name: MyString
+  description: MyText
+  organization: two
+  price: 9.99
+  branch: two
+  duration: 1
+  active: false
