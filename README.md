@@ -1,24 +1,25 @@
-# README
+# KlipperApp Backend
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Este es el backend de la aplicación KlipperApp, desarrollado en Ruby on Rails.
 
-Things you may want to cover:
+## Requisitos previos
 
-* Ruby version
+Asegúrate de tener instalados los siguientes componentes en tu sistema:
 
-* System dependencies
+- **Docker**: Para contenedores.
+- **Docker Compose**: Para orquestar los servicios.
 
-* Configuration
+## Instrucciones de instalación
 
-* Database creation
+Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local:
 
-* Database initialization
+### 1. Clonar el repositorio
 
-* How to run the test suite
+Clona este repositorio en tu máquina local:
 
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+```bash
+git clone https://github.com/tu-usuario/klipperapp-be.git
+cd klipperapp-be
+docker-compose build
+docker-compose up
+docker-compose run web rails db:migrate
