@@ -12,6 +12,7 @@ Rails.application.routes.draw do
       resources :attendances
       resources :branches
       resources :profiles
+      resources :roles
       resources :services
       resources :organizations do
         collection do

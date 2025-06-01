@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  description: MyText
+  organization: one
+  branch: one
+  is_admin: false
+
+two:
+  name: MyString
+  description: MyText
+  organization: two
+  branch: two
+  is_admin: false
