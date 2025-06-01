@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_01_012314) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_01_013408) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -28,6 +28,15 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_01_012314) do
     t.index ["organization_id"], name: "index_attendances_on_organization_id"
     t.index ["profile_id"], name: "index_attendances_on_profile_id"
     t.index ["service_id"], name: "index_attendances_on_service_id"
+  end
+
+  create_table "branch_users", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "branch_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["branch_id"], name: "index_branch_users_on_branch_id"
+    t.index ["user_id"], name: "index_branch_users_on_user_id"
   end
 
   create_table "branches", force: :cascade do |t|
@@ -95,10 +104,32 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_01_012314) do
     t.index ["organization_id"], name: "index_services_on_organization_id"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.string "phone_number"
+    t.string "address_line1"
+    t.string "address_line2"
+    t.string "city"
+    t.string "state"
+    t.string "zip_code"
+    t.string "country"
+    t.boolean "active"
+    t.string "password_digest"
+    t.bigint "role_id", null: false
+    t.bigint "organization_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_users_on_organization_id"
+    t.index ["role_id"], name: "index_users_on_role_id"
+  end
+
   add_foreign_key "attendances", "branches"
   add_foreign_key "attendances", "organizations"
   add_foreign_key "attendances", "profiles"
   add_foreign_key "attendances", "services"
+  add_foreign_key "branch_users", "branches"
+  add_foreign_key "branch_users", "users"
   add_foreign_key "branches", "organizations"
   add_foreign_key "profiles", "branches"
   add_foreign_key "profiles", "organizations"
@@ -106,4 +137,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_01_012314) do
   add_foreign_key "roles", "organizations"
   add_foreign_key "services", "branches"
   add_foreign_key "services", "organizations"
+  add_foreign_key "users", "organizations"
+  add_foreign_key "users", "roles"
 end

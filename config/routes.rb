@@ -14,6 +14,7 @@ Rails.application.routes.draw do
       resources :profiles
       resources :roles
       resources :services
+      resources :users
       resources :organizations do
         collection do
           get 'slug/:slug', to: 'organizations#find_by_slug', as: :find_by_slug
