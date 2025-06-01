@@ -5,6 +5,7 @@ class Attendance < ApplicationRecord
   belongs_to :service
   belongs_to :organization
   belongs_to :branch
+  belongs_to :attended_by_user, class_name: "User", foreign_key: :attended_by, optional: true
 
   aasm column: :status do
     state :pending, initial: true

@@ -36,6 +36,52 @@ module Api
         head :no_content
       end
 
+      def next_available
+        service = AssignBarberService.new(
+          organization_id: params[:organization_id],
+          branch_id: params[:branch_id]
+        )
+        barber = service.call
+
+        if barber
+          render json: barber, status: :ok
+        else
+          render json: { error: "No barbero disponible" }, status: :not_found
+        end
+      end
+
+      def start_day
+        if @user.start_day! && @user.update(start_working_at: Time.current)
+          render json: { message: "Inicio de jornada registrado" }, status: :ok
+        else
+          render json: { error: "No se pudo iniciar jornada" }, status: :unprocessable_entity
+        end
+      end
+
+      def end_day
+        if @user.end_day! && @user.update(start_working_at: nil)
+          render json: { message: "Fin de jornada registrado" }, status: :ok
+        else
+          render json: { error: "No se pudo finalizar jornada" }, status: :unprocessable_entity
+        end
+      end
+
+      def start_attendance
+        if @user.start_attendance!
+          render json: { message: "El barbero comenzó a atender" }, status: :ok
+        else
+          render json: { error: "No se pudo cambiar el estado a 'working'" }, status: :unprocessable_entity
+        end
+      end
+
+      def end_attendance
+        if @user.end_attendance!
+          render json: { message: "El barbero terminó de atender" }, status: :ok
+        else
+          render json: { error: "No se pudo cambiar el estado a 'available'" }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def set_user

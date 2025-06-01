@@ -57,6 +57,7 @@ Rails.application.configure do
   config.active_job.verbose_enqueue_logs = true
 
   config.hosts << "8dbd-186-11-50-237.ngrok-free.app"
+  config.cache_store = :memory_store
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
 

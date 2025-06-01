@@ -20,6 +20,11 @@ Rails.application.routes.draw do
           get 'slug/:slug', to: 'organizations#find_by_slug', as: :find_by_slug
         end
       end
+      get 'barbers/next_available', to: 'barbers#next_available'
+      post 'barbers/:id/start_day', to: 'barbers#start_day'
+      post 'barbers/:id/end_day', to: 'barbers#end_day'
+      post 'barbers/:id/start_attendance', to: 'barbers#start_attendance'
+      post 'barbers/:id/end_attendance', to: 'barbers#end_attendance'
       post 'login', to: 'auth#login'
       get 'me', to: 'auth#me'
     end
