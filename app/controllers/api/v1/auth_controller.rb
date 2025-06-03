@@ -16,8 +16,9 @@ module Api
       end
 
       def me
-        authorize_request
-        render json: @current_user
+        if authorize_request
+          render json: @current_user
+        end
       end
 
       private
