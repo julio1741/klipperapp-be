@@ -5,7 +5,7 @@ module Api
       before_action :set_profile, only: [:show, :update, :destroy]
 
       def index
-        @profiles = Profile.all
+        @profiles = @filtered_records || Profile.all
         render json: @profiles
       end
 

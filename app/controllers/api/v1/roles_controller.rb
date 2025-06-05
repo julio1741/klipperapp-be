@@ -5,7 +5,7 @@ module Api
       before_action :set_role, only: [:show, :update, :destroy]
 
       def index
-        @roles = Role.all
+        @roles = @filtered_records || Role.all
         render json: @roles
       end
 

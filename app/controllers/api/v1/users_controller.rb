@@ -4,7 +4,7 @@ module Api
       before_action :set_user, only: [:show, :update, :destroy]
 
       def index
-        @users = User.includes(:branches).all
+        @users = @filtered_records || User.includes(:branches).all
         render json: @users.to_json(include: :branches)
       end
 

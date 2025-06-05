@@ -5,7 +5,7 @@ module Api
       before_action :set_branch, only: [:show, :update, :destroy]
 
       def index
-        @branches = Branch.all
+        @branches = @filtered_records || Branch.all
         render json: @branches
       end
 

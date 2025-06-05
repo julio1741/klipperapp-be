@@ -6,7 +6,7 @@ module Api
 
       # GET /api/v1/attendances
       def index
-        @attendances = Attendance.all
+        @attendances = @filtered_records || Attendance.all
         render json: @attendances
       end
 

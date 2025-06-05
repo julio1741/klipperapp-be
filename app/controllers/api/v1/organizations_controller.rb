@@ -4,7 +4,7 @@ module Api
       before_action :set_organization, only: [:show, :update, :destroy]
 
       def index
-        @organizations = Organization.all
+        @organizations = @filtered_records || Organization.all
         render json: @organizations
       end
 

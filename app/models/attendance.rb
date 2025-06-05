@@ -1,5 +1,6 @@
 class Attendance < ApplicationRecord
   include AASM
+  include Filterable
 
   belongs_to :profile
   belongs_to :service

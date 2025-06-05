@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   include AASM
+  include Filterable
   has_secure_password
 
   belongs_to :role

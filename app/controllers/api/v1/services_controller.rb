@@ -5,7 +5,7 @@ module Api
       before_action :set_service, only: [:show, :update, :destroy]
 
       def index
-        @services = Service.all
+        @services = @filtered_records || Service.all
         render json: @services
       end
 
