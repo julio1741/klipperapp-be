@@ -18,6 +18,7 @@ class User < ApplicationRecord
   scope :barbers_working_today, ->(organization_id, branch_id) {
     where(role: Role.where(name: 'Barbero', organization_id: organization_id, branch_id: branch_id))
       .where.not(start_working_at: nil)
+      .where(work_state: 'available')
       .where("start_working_at >= ?", Time.now.in_time_zone('Santiago').beginning_of_day).order(:start_working_at)
   }
 
@@ -30,6 +31,14 @@ class User < ApplicationRecord
       transitions from: [:stand_by, :available], to: :available, after: :set_start_working_at
     end
 
+    event :not_available do
+      transitions from: [:available], to: :not_available
+    end
+
+    event :available do
+      transitions from: [:stand_by, :not_available], to: :available
+    end
+
     event :start_attendance do
       transitions from: :available, to: :working
     end
@@ -39,7 +48,7 @@ class User < ApplicationRecord
     end
 
     event :end_shift do
-      transitions from: [:available, :working], to: :stand_by
+      transitions from: [:available, :working], to: :stand_by, after: :set_end_working_at_nil
     end
   end
 
@@ -50,6 +59,12 @@ class User < ApplicationRecord
   private
 
   def set_start_working_at
-    self.start_working_at ||= Time.zone.now
+    self.start_working_at = Time.now.in_time_zone('Santiago')
+    save
+  end
+
+    def set_end_working_at_nil
+    self.start_working_at = nil
+    save
   end
 end

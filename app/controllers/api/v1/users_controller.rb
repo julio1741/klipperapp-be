@@ -1,7 +1,7 @@
 module Api
   module V1
     class UsersController < ApplicationController
-      before_action :set_user, only: [:show, :update, :destroy]
+      before_action :set_user, only: [:show, :update, :destroy, :start_day, :end_day, :start_attendance, :end_attendance]
 
       def index
         @users = @filtered_records || User.includes(:branches).all
@@ -50,8 +50,20 @@ module Api
         end
       end
 
+      # get barbers working today
+      def barbers_working_today
+        organization_id = params[:organization_id]
+        branch_id = params[:branch_id]
+        @barbers = User.barbers_working_today(organization_id, branch_id).order(:start_working_at)
+        if @barbers.any?
+          render json: @barbers, status: :ok
+        else
+          render json: { error: "No hay barberos trabajando hoy" }, status: :not_found
+        end
+      end
+
       def start_day
-        if @user.start_day! && @user.update(start_working_at: Time.current)
+        if @user.start_shift!
           render json: { message: "Inicio de jornada registrado" }, status: :ok
         else
           render json: { error: "No se pudo iniciar jornada" }, status: :unprocessable_entity
@@ -59,7 +71,7 @@ module Api
       end
 
       def end_day
-        if @user.end_day! && @user.update(start_working_at: nil)
+        if @user.end_shift!
           render json: { message: "Fin de jornada registrado" }, status: :ok
         else
           render json: { error: "No se pudo finalizar jornada" }, status: :unprocessable_entity
@@ -67,7 +79,17 @@ module Api
       end
 
       def start_attendance
+        attendance = Attendance.find_by(id: params[:attendance_id])
+        if attendance.nil?
+          render json: { error: "Asistencia no encontrada" }, status: :not_found
+          return
+        end
+        if attendance.attended_by != @user.id
+          render json: { error: "El barbero no está asignado a esta asistencia" }, status: :forbidden
+          return
+        end
         if @user.start_attendance!
+          attendance.start!
           render json: { message: "El barbero comenzó a atender" }, status: :ok
         else
           render json: { error: "No se pudo cambiar el estado a 'working'" }, status: :unprocessable_entity
@@ -75,11 +97,31 @@ module Api
       end
 
       def end_attendance
+        attendance = Attendance.find_by(id: params[:attendance_id])
+        if attendance.nil?
+          render json: { error: "Asistencia no encontrada" }, status: :not_found
+          return
+        end
+        if attendance.attended_by != @user.id
+          render json: { error: "El barbero no está asignado a esta asistencia" }, status: :forbidden
+          return
+        end
         if @user.end_attendance!
+          attendance.complete!
           render json: { message: "El barbero terminó de atender" }, status: :ok
         else
           render json: { error: "No se pudo cambiar el estado a 'available'" }, status: :unprocessable_entity
         end
+      end
+
+      def finish_attendance
+        attendance = Attendance.find_by(id: params[:attendance_id])
+        if attendance.nil?
+          render json: { error: "Asistencia no encontrada" }, status: :not_found
+          return
+        end
+        attendance.finish!
+        render json: { message: "Asistencia finalizada correctamente" }, status: :ok
       end
 
       private

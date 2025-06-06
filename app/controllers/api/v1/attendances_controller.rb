@@ -54,7 +54,8 @@ module Api
           :profile_id,
           :service_id,
           :organization_id,
-          :branch_id
+          :branch_id,
+          :attended_by
         )
       end
     end
