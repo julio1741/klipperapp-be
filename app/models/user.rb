@@ -15,10 +15,8 @@ class User < ApplicationRecord
   #validates :start_working_at, presence: true, if: -> { active? }
 
   # order by start_working_at ascending
-  scope :barbers_working_today, ->(organization_id, branch_id) {
-    where(role: Role.where(name: 'Barbero', organization_id: organization_id, branch_id: branch_id))
-      .where.not(start_working_at: nil)
-      .where(work_state: 'available')
+  scope :barbers_working_today, ->  {
+      where.not(start_working_at: nil)
       .where("start_working_at >= ?", Time.now.in_time_zone('Santiago').beginning_of_day).order(:start_working_at)
   }
 

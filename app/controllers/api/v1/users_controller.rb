@@ -54,7 +54,7 @@ module Api
       def barbers_working_today
         organization_id = params[:organization_id]
         branch_id = params[:branch_id]
-        @barbers = User.barbers_working_today(organization_id, branch_id).order(:start_working_at)
+        @barbers = User.barbers_working_today.order(:start_working_at)
         if @barbers.any?
           render json: @barbers, status: :ok
         else
