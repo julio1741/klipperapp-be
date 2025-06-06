@@ -17,7 +17,7 @@ module Api
 
       def me
         if authorize_request
-          render json: @current_user
+          render json: @current_user.to_json(include: :branches)
         end
       end
 
