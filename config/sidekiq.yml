@@ -1,0 +1,9 @@
+:concurrency: 5
+:queues:
+  - default
+
+
+:schedule:
+  cancel_old_attendances:
+    cron: "0 0 * * *" # Ejecutar todos los días a las 12:00 am
+    class: "CancelOldAttendancesJob"

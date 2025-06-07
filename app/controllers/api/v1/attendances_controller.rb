@@ -17,11 +17,20 @@ module Api
 
       # POST /api/v1/attendances
       def create
+        #1.⁠ ⁠que no se pueda crear un attendance si no hay trabajadores working_today
+        # ⁠que no se pueda crear un attendance si el user_id no es de un working_today
+        @barbers_working_today = User.barbers_working_today
         @attendance = Attendance.new(attendance_params)
-        if @attendance.save
-          render json: @attendance, status: :created
+        if @barbers_working_today.empty?
+          render json: { error: "No hay barberos trabajando hoy" }, status: :unprocessable_entity
+        elsif !@barbers_working_today.exists?(user_id: @attendance.user_id)
+          render json: { error: "El barbero no está trabajando hoy" }, status: :unprocessable_entity
         else
-          render json: @attendance.errors, status: :unprocessable_entity
+          if @attendance.save
+            render json: @attendance, status: :created
+          else
+            render json: @attendance.errors, status: :unprocessable_entity
+          end
         end
       end
 
