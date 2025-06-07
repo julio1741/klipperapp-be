@@ -5,18 +5,18 @@ module Api
 
       def index
         @users = @filtered_records || User.includes(:branches).all
-        render json: @users.to_json(include: :branches)
+        render json: @users
       end
 
       def show
-        render json: @user.to_json(include: :branches)
+        render json: @user
       end
 
       def create
         @user = User.new(user_params)
         if @user.save
           set_branches
-          render json: @user.to_json(include: :branches), status: :created
+          render json: @user, status: :created
         else
           render json: @user.errors, status: :unprocessable_entity
         end
@@ -25,7 +25,7 @@ module Api
       def update
         if @user.update(user_params)
           set_branches
-          render json: @user.to_json(include: :branches)
+          render json: @user
         else
           render json: @user.errors, status: :unprocessable_entity
         end
@@ -52,9 +52,7 @@ module Api
 
       # get barbers working today
       def barbers_working_today
-        organization_id = params[:organization_id]
-        branch_id = params[:branch_id]
-        @barbers = User.barbers_working_today.order(:start_working_at)
+        @barbers = @filtered_records.barbers_working_today.order(:start_working_at)
         if @barbers.any?
           render json: @barbers, status: :ok
         else

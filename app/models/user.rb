@@ -5,10 +5,7 @@ class User < ApplicationRecord
 
   belongs_to :role
   belongs_to :organization
-
-  has_many :branch_users
-  has_many :branches, through: :branch_users
-  has_many :attended_appointments, class_name: "Attendance", foreign_key: :attended_by
+  belongs_to :branch, optional: true # Ahora un usuario pertenece a un branch
 
   validates :email, presence: true, uniqueness: true
   validates :name, :phone_number, presence: true
