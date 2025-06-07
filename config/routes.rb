@@ -1,5 +1,10 @@
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  require 'sidekiq/web'
+  require 'sidekiq-scheduler/web' # ← ¡esto es clave!
+
+  # Montar Sidekiq::Web dentro de las rutas de la aplicación
+  mount Sidekiq::Web => '/sidekiq'
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

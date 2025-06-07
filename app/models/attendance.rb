@@ -31,4 +31,13 @@ class Attendance < ApplicationRecord
       transitions from: [:pending, :processing, :completed], to: :canceled
     end
   end
+
+  # Método para cancelar attendances pendientes de días anteriores
+  def self.cancel_old_pending_attendances
+    where(status: :pending)
+      .where("created_at < ?", Time.now.beginning_of_day)
+      .find_each do |attendance|
+        attendance.cancel!
+      end
+  end
 end
