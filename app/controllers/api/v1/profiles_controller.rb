@@ -5,8 +5,17 @@ module Api
       before_action :set_profile, only: [:show, :update, :destroy]
 
       def index
-        @profiles = @filtered_records || Profile.all
-        render json: @profiles
+        if params[:phone_number].present?
+          @profile = Profile.find_by(phone_number: params[:phone_number])
+          if @profile
+            render json: @profile
+          else
+            render json: { error: "Profile not found" }, status: :not_found
+          end
+        else
+          @profiles = @filtered_records || Profile.all
+          render json: @profiles
+        end
       end
 
       def show

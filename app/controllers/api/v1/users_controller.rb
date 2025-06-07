@@ -50,14 +50,15 @@ module Api
         end
       end
 
-      # get barbers working today
-      def barbers_working_today
-        @barbers = @filtered_records.barbers_working_today.order(:start_working_at)
-        if @barbers.any?
-          render json: @barbers, status: :ok
-        else
-          render json: { error: "No hay barberos trabajando hoy" }, status: :not_found
-        end
+      # get users working today
+      def users_working_today
+        organization_id = params[:organization_id]
+        branch_id = params[:branch_id]
+        role_id = params[:role_id]
+
+        @users = User.users_working_today(organization_id, branch_id, role_id)
+
+        render json: @users, status: :ok
       end
 
       def start_day

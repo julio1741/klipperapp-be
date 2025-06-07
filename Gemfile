@@ -38,6 +38,7 @@ gem "bootsnap", require: false
 gem 'aasm'
 gem 'bcrypt', '~> 3.1.7'
 gem 'jwt'
+gem 'rack-cors'
 gem 'sidekiq'
 gem 'sidekiq-scheduler'
 

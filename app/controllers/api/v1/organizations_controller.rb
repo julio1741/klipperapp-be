@@ -4,8 +4,17 @@ module Api
       before_action :set_organization, only: [:show, :update, :destroy]
 
       def index
-        @organizations = @filtered_records || Organization.all
-        render json: @organizations
+        if params[:slug].present?
+          organization = Organization.find_by(slug: params[:slug])
+          if organization
+            render json: organization
+          else
+            render json: { error: 'Organization not found' }, status: :not_found
+          end
+        else
+          @organizations = @filtered_records || Organization.all
+          render json: @organizations
+        end
       end
 
       def show
@@ -32,16 +41,6 @@ module Api
       def destroy
         @organization.destroy
         head :no_content
-      end
-
-      # New action to find organization by slug
-      def find_by_slug
-        @organization = Organization.find_by(slug: params[:slug])
-        if @organization
-          render json: @organization
-        else
-          render json: { error: 'Organization not found' }, status: :not_found
-        end
       end
 
       private

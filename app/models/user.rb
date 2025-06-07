@@ -12,9 +12,9 @@ class User < ApplicationRecord
   #validates :start_working_at, presence: true, if: -> { active? }
 
   # order by start_working_at ascending
-  scope :barbers_working_today, ->  {
+  scope :users_working_today, -> (organization_id, branch_id, role_id) {
       where.not(start_working_at: nil)
-      .where("start_working_at >= ?", Time.now.in_time_zone('Santiago').beginning_of_day).order(:start_working_at)
+      .where("start_working_at >= ? AND organization_id = ? AND branch_id = ? AND role_id = ?", Time.now.in_time_zone('Santiago').beginning_of_day, organization_id, branch_id, role_id).order(:start_working_at)
   }
 
   aasm column: 'work_state' do

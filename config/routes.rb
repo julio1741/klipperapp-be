@@ -19,21 +19,24 @@ Rails.application.routes.draw do
       resources :profiles
       resources :roles
       resources :services
-      resources :users
-      resources :organizations do
-        collection do
-          get 'slug/:slug', to: 'organizations#find_by_slug', as: :find_by_slug
+
+      resources :users do
+          collection do
+            get 'working_today', to: 'users#users_working_today'
+            get 'next_available', to: 'users#next_available'
+            post 'start_day', to: 'users#start_day'
+            post 'end_day', to: 'users#end_day'
+            post 'start_attendance', to: 'users#start_attendance'
+            post 'end_attendance', to: 'users#end_attendance'
+            post 'finish_attendance', to: 'users#finish_attendance'
+          end
         end
-      end
-      get 'barbers/barbers_working_today', to: 'users#barbers_working_today'
-      get 'barbers/next_available', to: 'users#next_available'
-      post 'barber/start_day', to: 'users#start_day'
-      post 'barber/end_day', to: 'users#end_day'
-      post 'barber/start_attendance', to: 'users#start_attendance'
-      post 'barber/end_attendance', to: 'users#end_attendance'
-      post 'barber/finish_attendance', to: 'users#finish_attendance'
-      post 'login', to: 'auth#login'
-      get 'me', to: 'auth#me'
+
+        resources :organizations do
+          collection do
+            get 'slug/:slug', to: 'organizations#find_by_slug', as: :find_by_slug
+          end
+        end
     end
   end
 end
