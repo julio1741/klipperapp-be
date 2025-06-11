@@ -2,6 +2,7 @@ module Api
   module V1
     class UsersController < ApplicationController
       before_action :set_user, only: [:show, :update, :destroy, :start_day, :end_day, :start_attendance, :end_attendance]
+      skip_before_action :set_user, only: [:start_attendance]
 
       def index
         @users = @filtered_records || User.includes(:branches).all
@@ -78,16 +79,18 @@ module Api
       end
 
       def start_attendance
+        user = User.find_by(id: params[:user_id])
+        return render json: { error: "Usuario no encontrado" }, status: :not_found unless user
+
         attendance = Attendance.find_by(id: params[:attendance_id])
-        if attendance.nil?
-          render json: { error: "Asistencia no encontrada" }, status: :not_found
-          return
-        end
-        if attendance.attended_by != @user.id
+        return render json: { error: "Asistencia no encontrada" }, status: :not_found unless attendance
+
+        if attendance.attended_by != user.id
           render json: { error: "El barbero no está asignado a esta asistencia" }, status: :forbidden
           return
         end
-        if @user.start_attendance!
+
+        if user.start_attendance!
           attendance.start!
           render json: { message: "El barbero comenzó a atender" }, status: :ok
         else

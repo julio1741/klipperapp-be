@@ -7,7 +7,7 @@ module Api
         if user&.authenticate(params[:password])
           token = encode_token({
             user_id: user.id,
-            exp: Time.now.in_time_zone('Santiago').end_of_day.to_i
+            exp: Time.now.in_time_zone('America/Santiago').end_of_day.to_i
           })
           render json: { token: token, user: user }, status: :ok
         else

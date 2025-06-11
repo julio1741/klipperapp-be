@@ -6,8 +6,17 @@ module Api
 
       # GET /api/v1/attendances
       def index
-        @attendances = @filtered_records || Attendance.all
-        render json: @attendances
+        @attendances = @filtered_records || Attendance.includes(:attended_by_user, :profile, :service)
+          .where(status: [:pending, :processing, :completed, :finished])
+          .order(:created_at)
+
+        render json: @attendances.map { |attendance|
+          attendance.as_json(include: {
+            attended_by_user: {},
+            profile: {},
+            service: {}
+          })
+        }
       end
 
       # GET /api/v1/attendances/:id
@@ -17,20 +26,11 @@ module Api
 
       # POST /api/v1/attendances
       def create
-        #1.⁠ ⁠que no se pueda crear un attendance si no hay trabajadores working_today
-        # ⁠que no se pueda crear un attendance si el user_id no es de un working_today
-        @barbers_working_today = User.barbers_working_today
         @attendance = Attendance.new(attendance_params)
-        if @barbers_working_today.empty?
-          render json: { error: "No hay barberos trabajando hoy" }, status: :unprocessable_entity
-        elsif !@barbers_working_today.exists?(user_id: @attendance.user_id)
-          render json: { error: "El barbero no está trabajando hoy" }, status: :unprocessable_entity
+        if @attendance.save
+          render json: @attendance, status: :created
         else
-          if @attendance.save
-            render json: @attendance, status: :created
-          else
-            render json: @attendance.errors, status: :unprocessable_entity
-          end
+          render json: @attendance.errors, status: :unprocessable_entity
         end
       end
 
@@ -47,6 +47,49 @@ module Api
       def destroy
         @attendance.destroy
         head :no_content
+      end
+
+      # GET /api/v1/attendances/by_users_working_today
+      def by_users_working_today
+        organization_id = params[:organization_id]
+        branch_id = params[:branch_id]
+        role_id = params[:role_id]
+
+        users = User.where(
+          organization_id: organization_id,
+          branch_id: branch_id,
+          role_id: role_id
+        ).where(
+          "start_working_at BETWEEN ? AND ?",
+          Time.now.in_time_zone('America/Santiago').beginning_of_day,
+          Time.now.in_time_zone('America/Santiago').end_of_day
+        ).order(:start_working_at)
+
+        result = users.map do |user|
+          attendances = Attendance.includes(:profile)
+            .where(attended_by: user.id, status: [:pending, :processing])
+            .order(:created_at)
+
+          {
+            user: user,
+            profiles: attendances.map do |att|
+              profile = att.profile
+              {
+                id: profile.id,
+                name: profile.name,
+                email: profile.email,
+                birth_date: profile.birth_date,
+                phone_number: profile.phone_number,
+                organization_id: profile.organization_id,
+                branch_id: profile.branch_id,
+                attendance_id: att.id,
+                status: att.status
+              }
+            end
+          }
+        end
+
+        render json: result, status: :ok
       end
 
       private

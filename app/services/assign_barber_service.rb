@@ -1,4 +1,3 @@
-# app/services/assign_barber_service.rb
 class AssignBarberService
   def initialize(organization_id:, branch_id:)
     @organization_id = organization_id
@@ -6,7 +5,7 @@ class AssignBarberService
   end
 
   def call
-    today = Time.now.in_time_zone('Santiago')
+    today = Time.now.in_time_zone('America/Santiago')
 
     # Buscamos barberos disponibles que empezaron a trabajar hoy
     barbers = User.joins(:role)

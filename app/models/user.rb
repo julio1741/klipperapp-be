@@ -14,7 +14,7 @@ class User < ApplicationRecord
   # order by start_working_at ascending
   scope :users_working_today, -> (organization_id, branch_id, role_id) {
       where.not(start_working_at: nil)
-      .where("start_working_at >= ? AND organization_id = ? AND branch_id = ? AND role_id = ?", Time.now.in_time_zone('Santiago').beginning_of_day, organization_id, branch_id, role_id).order(:start_working_at)
+      .where("start_working_at >= ? AND organization_id = ? AND branch_id = ? AND role_id = ?", Time.now.in_time_zone('America/Santiago').beginning_of_day, organization_id, branch_id, role_id).order(:start_working_at)
   }
 
   aasm column: 'work_state' do
@@ -54,7 +54,7 @@ class User < ApplicationRecord
   private
 
   def set_start_working_at
-    self.start_working_at = Time.now.in_time_zone('Santiago')
+    self.start_working_at = Time.now.in_time_zone('America/Santiago')
     save
   end
 

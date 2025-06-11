@@ -14,7 +14,11 @@ Rails.application.routes.draw do
   # root "posts#index"
   namespace :api do
     namespace :v1 do
-      resources :attendances
+      resources :attendances do
+        collection do
+          get 'by_users_working_today', to: 'attendances#by_users_working_today'
+        end
+      end
       resources :branches
       resources :profiles
       resources :roles
