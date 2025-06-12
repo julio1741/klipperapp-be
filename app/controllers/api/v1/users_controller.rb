@@ -1,7 +1,7 @@
 module Api
   module V1
     class UsersController < ApplicationController
-      before_action :set_user, only: [:show, :update, :destroy, :start_day, :end_day, :start_attendance, :end_attendance]
+      before_action :set_user, only: [:show, :update, :destroy, :start_day, :end_day]
 
       def index
         @users = @filtered_records || User.includes(:branches).all
@@ -78,14 +78,19 @@ module Api
       end
 
       def start_attendance
+        user_id = params[:user_id].presence
+        attendance_id = params[:attendance_id].presence
+
+        return render json: { error: "Falta user_id o attendance_id" }, status: :bad_request unless user_id && attendance_id
+
+        @user = User.find_by(id: user_id)
         return render json: { error: "Usuario no encontrado" }, status: :not_found unless @user
 
-        attendance = Attendance.find_by(id: params[:attendance_id])
+        attendance = Attendance.find_by(id: attendance_id)
         return render json: { error: "Asistencia no encontrada" }, status: :not_found unless attendance
 
         if attendance.attended_by != @user.id
-          render json: { error: "El barbero no está asignado a esta asistencia" }, status: :forbidden
-          return
+          return render json: { error: "El barbero no está asignado a esta asistencia" }, status: :forbidden
         end
 
         if @user.start_attendance!
@@ -97,15 +102,22 @@ module Api
       end
 
       def end_attendance
-        attendance = Attendance.find_by(id: params[:attendance_id])
-        if attendance.nil?
-          render json: { error: "Asistencia no encontrada" }, status: :not_found
-          return
-        end
+        user_id = params[:user_id].presence
+        attendance_id = params[:attendance_id].presence
+
+        return render json: { error: "Falta user_id o attendance_id" }, status: :bad_request unless user_id && attendance_id
+
+        @user = User.find_by(id: user_id)
+        return render json: { error: "Usuario no encontrado" }, status: :not_found unless @user
+
+        attendance = Attendance.find_by(id: attendance_id)
+        return render json: { error: "Asistencia no encontrada" }, status: :not_found unless attendance
+
         if attendance.attended_by != @user.id
           render json: { error: "El barbero no está asignado a esta asistencia" }, status: :forbidden
           return
         end
+
         if @user.end_attendance!
           attendance.complete! if attendance.may_complete?
           render json: { message: "El barbero terminó de atender" }, status: :ok
@@ -115,11 +127,17 @@ module Api
       end
 
       def finish_attendance
-        attendance = Attendance.find_by(id: params[:attendance_id])
-        if attendance.nil?
-          render json: { error: "Asistencia no encontrada" }, status: :not_found
-          return
-        end
+        user_id = params[:user_id].presence
+        attendance_id = params[:attendance_id].presence
+
+        return render json: { error: "Falta user_id o attendance_id" }, status: :bad_request unless user_id && attendance_id
+
+        @user = User.find_by(id: user_id)
+        return render json: { error: "Usuario no encontrado" }, status: :not_found unless @user
+
+        attendance = Attendance.find_by(id: attendance_id)
+        return render json: { error: "Asistencia no encontrada" }, status: :not_found unless attendance
+
         attendance.finish!
         render json: { message: "Asistencia finalizada correctamente" }, status: :ok
       end
