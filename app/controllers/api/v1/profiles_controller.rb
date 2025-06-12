@@ -8,7 +8,9 @@ module Api
         if params[:phone_number].present?
           @profile = Profile.find_by(phone_number: params[:phone_number])
           if @profile
-            render json: @profile
+            organizatiopn_id = @current_user.organization_id
+            is_attended_today = Attendance.profile_in_attendance_today?(profile_id)
+            render json: { profile: @profile, is_attended_today: is_attended_today }
           else
             render json: { error: "Profile not found" }, status: :not_found
           end

@@ -44,6 +44,15 @@ class Attendance < ApplicationRecord
     save
   end
 
+  # Metodo para obtener si un profile ya esta en un attendance en proceso o pendiente del día de hoy
+  def self.profile_in_attendance_today?(profile_id)
+    today = Time.now.in_time_zone('America/Santiago').beginning_of_day
+    where(profile_id: profile_id)
+      .where(status: [:pending, :processing])
+      .where("created_at >= ?", today)
+      .exists?
+  end
+
   # Método para cancelar attendances pendientes de días anteriores
   def self.cancel_old_pending_attendances
     where(status: :pending)
