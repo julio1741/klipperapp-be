@@ -35,7 +35,7 @@ class Attendance < ApplicationRecord
   end
 
   def set_attended_by
-    assign_service = AssignBarberService.new(
+    assign_service = AssignUserService.new(
       organization_id: self.organization_id,
       branch_id: self.branch_id,
       role_id: 2) # Buscar otra forma de obtener el role id
@@ -55,7 +55,7 @@ class Attendance < ApplicationRecord
 
   # Método para cancelar attendances pendientes de días anteriores
   def self.cancel_old_pending_attendances
-    where(status: :pending)
+    where(status: [:pending, :processing])
       .where("created_at < ?", Time.now.beginning_of_day)
       .find_each do |attendance|
         attendance.cancel!
