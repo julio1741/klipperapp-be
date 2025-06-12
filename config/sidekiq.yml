@@ -7,3 +7,6 @@
   cancel_old_attendances:
     cron: "0 0 * * *" # Ejecutar todos los días a las 12:00 am
     class: "CancelOldAttendancesJob"
+  set_users_stand_by:
+    cron: "0 0 * * *" # Ejecutar todos los días a las 12:00 am
+    class: "SetUsersStandByJob"

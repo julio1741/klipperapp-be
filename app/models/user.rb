@@ -42,6 +42,10 @@ class User < ApplicationRecord
       transitions from: :working, to: :available
     end
 
+    event :set_stand_by do
+      transitions from: [:working, :available, :not_available], to: :stand_by
+    end
+
     event :end_shift do
       transitions from: [:available, :working], to: :stand_by, after: :set_end_working_at_nil
     end
@@ -50,6 +54,14 @@ class User < ApplicationRecord
   def working_today?
     start_working_at&.to_date == Date.today
   end
+
+  # set users on stand by
+  def self.set_users_stand_by
+    where(work_state: [:working, :available, :not_available]).each do |user|
+      user.set_stand_by!
+    end
+  end
+
 
   private
 
