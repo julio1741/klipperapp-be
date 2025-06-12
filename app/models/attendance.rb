@@ -8,6 +8,8 @@ class Attendance < ApplicationRecord
   belongs_to :branch
   belongs_to :attended_by_user, class_name: "User", foreign_key: :attended_by, optional: true
 
+  after_create :set_attended_by, if: -> { attended_by.nil? }
+
   aasm column: :status do
     state :pending, initial: true
     state :processing
@@ -30,6 +32,16 @@ class Attendance < ApplicationRecord
     event :cancel do
       transitions from: [:pending, :processing, :completed], to: :canceled
     end
+  end
+
+  def set_attended_by
+    assign_service = AssignBarberService.new(
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      role_id: 2) # Buscar otra forma de obtener el role id
+    user = assign_service.call
+    self.attended_by = user.id if user
+    save
   end
 
   # Método para cancelar attendances pendientes de días anteriores
