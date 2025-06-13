@@ -53,7 +53,7 @@ module Api
         organization_id = @current_user.organization_id
         branch_id = @current_user.branch_id
         role_id = params[:role_id]
-        users = AvailableUsersQueueService.new(
+        result = AvailableUsersQueueService.new(
           organization_id: organization_id,
           branch_id: branch_id,
           role_name: 'agent'
