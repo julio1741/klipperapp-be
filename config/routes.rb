@@ -17,6 +17,7 @@ Rails.application.routes.draw do
       resources :attendances do
         collection do
           get 'by_users_working_today', to: 'attendances#by_users_working_today'
+          get 'by_users_queue', to: 'attendances#by_users_queue'
         end
       end
       resources :branches

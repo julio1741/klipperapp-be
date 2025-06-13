@@ -49,6 +49,18 @@ module Api
         head :no_content
       end
 
+      def by_users_queue
+        organization_id = @current_user.organization_id
+        branch_id = @current_user.branch_id
+        role_id = params[:role_id]
+        users = AvailableBarbersQueueService.new(
+          organization_id: organization_id,
+          branch_id: branch_id,
+          role_name: 'agent'
+        ).call
+
+        render json: result, status: :ok
+      end
       # GET /api/v1/attendances/by_users_working_today
       def by_users_working_today
         organization_id = params[:organization_id]
