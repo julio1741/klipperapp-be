@@ -11,7 +11,7 @@ class AvailableUsersQueueService
 
     User
       .select('users.*, COUNT(attendances.id) AS pending_count')
-      .joins("LEFT JOIN attendances ON attendances.user_id = users.id AND attendances.status = 'pending'")
+      .joins("LEFT JOIN attendances ON attendances.attended_by = users.id AND attendances.status = 'pending'")
       .where(organization_id: @organization_id)
       .where(branch_id: @branch_id)
       .where(role_id: role.id)
