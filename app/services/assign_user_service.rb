@@ -1,54 +1,32 @@
 class AssignUserService
-  def initialize(organization_id:, branch_id:, role_id:)
+  def initialize(organization_id:, branch_id:, role_name:)
     @organization_id = organization_id
     @branch_id = branch_id
-    @role_id = role_id
+    @role_name = role_name
   end
 
   def call
-    now = Time.current.in_time_zone('America/Santiago')
+    today = Time.current.in_time_zone('America/Santiago').to_date
 
-    # Traemos a los barberos que están trabajando hoy
+    role = Role.find_by(name: @role_name)
+    # Traemos a los usuarios activos hoy, ordenados por orden de llegada
     users = User.where(
       organization_id: @organization_id,
       branch_id: @branch_id,
-      role_id: @role_id,
+      role_id: role.id,
       work_state: :available
-    ).where('DATE(start_working_at) = ?', now.to_date)
+    ).where('DATE(start_working_at) = ?', today)
      .order(:start_working_at)
 
     return nil if users.empty?
 
-    # Para cada barbero calculamos su próxima disponibilidad
-    barber_availabilities = users.map do |user|
-      [user, next_available_at(user, now)]
+    # Para cada usuario contamos cuántos attendances pending tiene
+    user_with_pending_count = users.map do |user|
+      pending_count = Attendance.where(user_id: user.id, status: :pending).count
+      [user, pending_count]
     end
 
-    # Seleccionamos al barbero que estará disponible más pronto
-    next_barber, _time = barber_availabilities.min_by { |_b, time| time }
-
-    next_barber
-  end
-
-  private
-
-  # Obtiene la hora a la que un barbero estará disponible
-  def next_available_at(user, now)
-    last_attendance = Attendance.where(attended_by: user.id)
-                                .where('created_at >= ?', now.beginning_of_day)
-                                .order(end_time_sql)
-                                .last
-
-    if last_attendance
-      end_time = last_attendance.created_at + last_attendance.service.duration.minutes
-      [end_time, now].max
-    else
-      now
-    end
-  end
-
-  # Helper para ordenar por término de atención
-  def end_time_sql
-    Arel.sql("created_at + (SELECT duration FROM services WHERE services.id = attendances.service_id) * interval '1 minute'")
+    # Buscamos al usuario con menor cantidad de pendientes, respetando el orden de llegada
+    user_with_pending_count.min_by { |user, count| [count, user.start_working_at] }&.first
   end
 end
