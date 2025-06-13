@@ -38,7 +38,7 @@ class Attendance < ApplicationRecord
     assign_service = AssignUserService.new(
       organization_id: self.organization_id,
       branch_id: self.branch_id,
-      role_name: "Barbero") # Buscar otra forma de obtener el role id
+      role_name: "agent") # Buscar otra forma de obtener el role id
     user = assign_service.call
     self.attended_by = user.id if user
     save
