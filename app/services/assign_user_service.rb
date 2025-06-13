@@ -22,7 +22,7 @@ class AssignUserService
 
     # Para cada usuario contamos cuántos attendances pending tiene
     user_with_pending_count = users.map do |user|
-      pending_count = Attendance.where(user_id: user.id, status: :pending).count
+      pending_count = Attendance.where(attended_by: user.id, status: :pending).count
       [user, pending_count]
     end
 
