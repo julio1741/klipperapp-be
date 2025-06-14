@@ -134,7 +134,13 @@ module Api
           :service_id,
           :organization_id,
           :branch_id,
-          :attended_by
+          :attended_by,
+          :discount,
+          :extra_discount,
+          :user_amount,
+          :organization_amount,
+          :start_attendance_at,
+          :end_attendance_at
         )
       end
     end

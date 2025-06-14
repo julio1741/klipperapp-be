@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_07_141449) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_14_030647) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -25,10 +25,25 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_07_141449) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "attended_by"
+    t.integer "discount"
+    t.integer "extra_discount"
+    t.integer "user_amount"
+    t.integer "organization_amount"
+    t.datetime "start_attendance_at", precision: nil
+    t.datetime "end_attendance_at", precision: nil
     t.index ["branch_id"], name: "index_attendances_on_branch_id"
     t.index ["organization_id"], name: "index_attendances_on_organization_id"
     t.index ["profile_id"], name: "index_attendances_on_profile_id"
     t.index ["service_id"], name: "index_attendances_on_service_id"
+  end
+
+  create_table "branch_users", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "branch_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["branch_id"], name: "index_branch_users_on_branch_id"
+    t.index ["user_id"], name: "index_branch_users_on_user_id"
   end
 
   create_table "branches", force: :cascade do |t|
@@ -125,6 +140,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_07_141449) do
   add_foreign_key "attendances", "profiles"
   add_foreign_key "attendances", "services"
   add_foreign_key "attendances", "users", column: "attended_by"
+  add_foreign_key "branch_users", "branches"
+  add_foreign_key "branch_users", "users"
   add_foreign_key "branches", "organizations"
   add_foreign_key "profiles", "branches"
   add_foreign_key "profiles", "organizations"
