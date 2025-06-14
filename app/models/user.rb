@@ -102,12 +102,13 @@ class User < ApplicationRecord
   def set_today_users_list
     today = Time.current.in_time_zone('America/Santiago').to_date
     redis_key = "user_rotation_list:org:#{organization_id}:branch:#{branch_id}:#{today}"
-    puts "Setting user rotation list for organization: #{organization_id}, branch: #{branch_id}, date: #{today}"
+
     user_ids = Rails.cache.read(redis_key)
     if user_ids.blank?
       # Generamos la lista desde cero (orden justo inicial)
       user_ids = build_initial_queue
       Rails.cache.write(redis_key, user_ids, expires_in: 12.hours)
+      puts "Setting key #{redis_key} with initial queue: #{user_ids.inspect}"
     end
   end
 
