@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::API
   attr_reader :current_user
-  before_action :apply_filters, if: -> { action_name == 'index' && respond_to?(:index) }
+  ACTIONS_TO_FILTER = %w[index today].freeze
+  before_action :apply_filters, if: -> { ACTIONS_TO_FILTER.include?('index') }
 
   private
 
