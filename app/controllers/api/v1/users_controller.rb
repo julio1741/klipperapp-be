@@ -138,6 +138,7 @@ module Api
         attendance = Attendance.find_by(id: attendance_id)
         return render json: { error: "Asistencia no encontrada" }, status: :not_found unless attendance
 
+        attendance.assign_attributes(finish_attendance_params)
         attendance.finish!
         render json: { message: "Asistencia finalizada correctamente" }, status: :ok
       end
@@ -152,6 +153,14 @@ module Api
         if params[:branch_ids]
           @user.branch_ids = params[:branch_ids]
         end
+      end
+
+      def finish_attendance_params
+        params.require(:attendance).permit(
+          :discount, :extra_discount,
+          :user_amount, :organization_amount, :total_amount, :trx_number,
+          :payment_method
+        )
       end
 
       def user_params
