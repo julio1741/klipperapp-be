@@ -6,7 +6,7 @@ module Api
 
       # GET /api/v1/attendances
       def index
-        @attendances = @filtered_records || Attendance.includes(:attended_by_user, :profile, :service)
+        @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
           .where(status: [:pending, :processing, :completed, :finished])
           .order(:created_at)
 
@@ -22,7 +22,7 @@ module Api
       # GET /api/v1/attendances/today
       def today
         today = Time.now.in_time_zone('America/Santiago').beginning_of_day
-        @attendances = @filtered_records || Attendance.includes(:attended_by_user, :profile, :service)
+        @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
           .where(status: [:pending, :processing, :completed, :finished])
           .where("created_at >= ?", today)
         render json: @attendances.map { |attendance|
