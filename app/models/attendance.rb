@@ -19,11 +19,11 @@ class Attendance < ApplicationRecord
     state :canceled
 
     event :start do
-      transitions from: :pending, to: :processing
+      transitions from: :pending, to: :processing, after: [:set_start_attendance]
     end
 
     event :complete do
-      transitions from: :processing, to: :completed
+      transitions from: :processing, to: :completed, after: [:set_end_attendance]
     end
 
     event :finish do
@@ -33,6 +33,16 @@ class Attendance < ApplicationRecord
     event :cancel do
       transitions from: [:pending, :processing, :completed], to: :canceled
     end
+  end
+
+  def set_start_attendance
+    self.start_attendance_at = Time.now.in_time_zone('America/Santiago')
+    save
+  end
+
+  def set_end_attendance
+    self.end_attendance_at = Time.now.in_time_zone('America/Santiago')
+    save
   end
 
   def set_attended_by

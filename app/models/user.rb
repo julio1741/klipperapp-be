@@ -38,11 +38,11 @@ class User < ApplicationRecord
     end
 
     event :start_attendance do
-      transitions from: :available, to: :working, after: [:pop_user_from_queue, :set_start_attendance]
+      transitions from: :available, to: :working, after: [:pop_user_from_queue]
     end
 
     event :end_attendance do
-      transitions from: :working, to: :available, after: [:push_user_if_needed, :set_end_attendance]
+      transitions from: :working, to: :available, after: [:push_user_if_needed]
     end
 
     event :set_stand_by do
@@ -52,16 +52,6 @@ class User < ApplicationRecord
     event :end_shift do
       transitions from: [:available, :working], to: :stand_by, after: :set_end_working_at_nil
     end
-  end
-
-  def set_start_attendance
-    self.start_attendance_at = Time.now.in_time_zone('America/Santiago')
-    save
-  end
-
-  def set_end_attendance
-    self.end_attendance_at = Time.now.in_time_zone('America/Santiago')
-    save
   end
 
   def pop_user_from_queue
@@ -90,7 +80,7 @@ class User < ApplicationRecord
       # If the queue is empty, reset it
       if user_ids.empty?
         Rails.cache.delete(redis_key)
-        set_today_users_list
+        user.set_today_users_list
       end
     end
   end
@@ -123,6 +113,7 @@ class User < ApplicationRecord
 
   def set_today_users_list
     today = Time.current.in_time_zone('America/Santiago').to_date
+    redis_key = "user_rotation_list:org:#{organization_id}:branch:#{branch_id}:#{today}"
     user_ids = Rails.cache.read(redis_key)
     if user_ids.blank?
       # Generamos la lista desde cero (orden justo inicial)
