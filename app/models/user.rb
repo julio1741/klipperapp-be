@@ -62,6 +62,10 @@ class User < ApplicationRecord
   end
 
   def self.pop_user_from_queue user_id
+    user = User.find_by(id: user_id)
+    return unless user
+    organization_id = user.organization_id
+    branch_id = user.branch_id
     today = Time.current.in_time_zone('America/Santiago').to_date
     redis_key = "user_rotation_list:org:#{organization_id}:branch:#{branch_id}:#{today}"
     user_ids = Rails.cache.read(redis_key)
@@ -78,6 +82,10 @@ class User < ApplicationRecord
   end
 
   def self.push_user_to_queue user_id
+    user = User.find_by(id: user_id)
+    return unless user
+    organization_id = user.organization_id
+    branch_id = user.branch_id
     today = Time.current.in_time_zone('America/Santiago').to_date
     redis_key = "user_rotation_list:org:#{organization_id}:branch:#{branch_id}:#{today}"
     user_ids = Rails.cache.read(redis_key) || []
@@ -100,10 +108,6 @@ class User < ApplicationRecord
   end
 
   def set_today_users_list
-    self.class.set_today_users_list
-  end
-
-  def self.set_today_users_list
     today = Time.current.in_time_zone('America/Santiago').to_date
     redis_key = "user_rotation_list:org:#{organization_id}:branch:#{branch_id}:#{today}"
 
@@ -112,7 +116,7 @@ class User < ApplicationRecord
       # Generamos la lista desde cero (orden justo inicial)
       user_ids = build_initial_queue
       Rails.cache.write(redis_key, user_ids, expires_in: 12.hours)
-      puts "Setting key #{redis_key} with initial queue: #{user_ids.inspect}"
+      puts "Setting key #{redis_key} with initial queue: #{user_ids.inspect} from User"
     end
   end
 
@@ -123,7 +127,7 @@ class User < ApplicationRecord
       .where(organization_id: organization_id)
       .where(branch_id: branch_id)
       .where(role_id: role.id)
-      .where('DATE(start_working_at) = ?', today)
+      .where('start_working_at >= ?', today.beginning_of_day)
       .group('users.id')
       .order('start_working_at ASC')
       .pluck('users.id')
