@@ -38,7 +38,7 @@ class User < ApplicationRecord
     end
 
     event :start_attendance do
-      transitions from: :available, to: :working
+      transitions from: :available, to: :working, after: :pop_user_from_queue
     end
 
     event :end_attendance do
@@ -52,6 +52,10 @@ class User < ApplicationRecord
     event :end_shift do
       transitions from: [:available, :working], to: :stand_by, after: :set_end_working_at_nil
     end
+  end
+
+  def pop_user_from_queue
+    User.pop_user_from_queue(self.id)
   end
 
   def push_user_if_needed
