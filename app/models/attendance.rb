@@ -9,6 +9,11 @@ class Attendance < ApplicationRecord
   belongs_to :attended_by_user, class_name: "User", foreign_key: :attended_by, optional: true
 
   after_create :set_attended_by, if: -> { attended_by.nil? }
+  # update user list after create if attended_by changed
+  after_update :update_user_list, if: -> {
+    saved_change_to_attended_by? && attended_by.present?
+  }
+  # update user list after destroy
 
   aasm column: :status do
     state :pending, initial: true
@@ -61,4 +66,11 @@ class Attendance < ApplicationRecord
         attendance.cancel!
       end
   end
+
+  def update_user_list
+    return unless attended_by.present?
+    # Eliminar el usuario de la lista de usuarios disponibles
+    User.pop_user_from_queue(attended_by)
+  end
+
 end
