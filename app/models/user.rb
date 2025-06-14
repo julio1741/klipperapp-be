@@ -113,12 +113,13 @@ class User < ApplicationRecord
   end
 
   def build_initial_queue
+    today = Time.current.in_time_zone('America/Santiago').to_date
     role = Role.find_by(name: 'agent')
     User
-      .where(organization_id: @organization_id)
-      .where(branch_id: @branch_id)
+      .where(organization_id: organization_id)
+      .where(branch_id: branch_id)
       .where(role_id: role.id)
-      .where('DATE(start_working_at) = ?', @today)
+      .where('DATE(start_working_at) = ?', today)
       .group('users.id')
       .order('start_working_at ASC')
       .pluck('users.id')
