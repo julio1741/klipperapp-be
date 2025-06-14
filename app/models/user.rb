@@ -38,11 +38,11 @@ class User < ApplicationRecord
     end
 
     event :start_attendance do
-      transitions from: :available, to: :working, after: [:pop_user_from_queue]
+      transitions from: :available, to: :working, after: [:rotate_user_from_queue]
     end
 
     event :end_attendance do
-      transitions from: :working, to: :available, after: [:push_user_if_needed]
+      transitions from: :working, to: :available
     end
 
     event :set_stand_by do
@@ -54,50 +54,12 @@ class User < ApplicationRecord
     end
   end
 
-  def pop_user_from_queue
-    User.pop_user_from_queue(self.id)
-  end
-
-  def push_user_if_needed
-    # verify if user does not have any pending attendances
-    if attendances.where(status: [:pending, :processing]).where("created_at >= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day).empty?
-      self.class.push_user_to_queue(self.id)
-    end
-  end
-
-  def self.pop_user_from_queue user_id
-    user = User.find_by(id: user_id)
-    return unless user
-    organization_id = user.organization_id
-    branch_id = user.branch_id
-    today = Time.current.in_time_zone('America/Santiago').to_date
-    redis_key = "user_rotation_list:org:#{organization_id}:branch:#{branch_id}:#{today}"
-    user_ids = Rails.cache.read(redis_key)
-    if user_ids.present?
-      # Remove working user from the queue
-      user_ids.delete(user_id)
-      Rails.cache.write(redis_key, user_ids, expires_in: 12.hours)
-      # If the queue is empty, reset it
-      if user_ids.empty?
-        Rails.cache.delete(redis_key)
-        user.set_today_users_list
-      end
-    end
-  end
-
-  def self.push_user_to_queue user_id
-    user = User.find_by(id: user_id)
-    return unless user
-    organization_id = user.organization_id
-    branch_id = user.branch_id
-    today = Time.current.in_time_zone('America/Santiago').to_date
-    redis_key = "user_rotation_list:org:#{organization_id}:branch:#{branch_id}:#{today}"
-    user_ids = Rails.cache.read(redis_key) || []
-    unless user_ids.include?(user_id)
-      # Add user back to the queue
-      user_ids << user_id
-      Rails.cache.write(redis_key, user_ids, expires_in: 12.hours)
-    end
+  def rotate_user_from_queue
+    assign_service = UserQueueService.new(
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      role_name: "agent")
+    assign_service.rotate(self.id)
   end
 
   def working_today?

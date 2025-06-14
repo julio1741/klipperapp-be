@@ -46,11 +46,11 @@ class Attendance < ApplicationRecord
   end
 
   def set_attended_by
-    assign_service = AssignUserService.new(
+    assign_service = UserQueueService.new(
       organization_id: self.organization_id,
       branch_id: self.branch_id,
       role_name: "agent") # Buscar otra forma de obtener el role id
-    user = assign_service.call
+    user = assign_service.next_available
     self.attended_by = user.id if user
     save
   end

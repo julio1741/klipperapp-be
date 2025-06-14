@@ -68,11 +68,11 @@ module Api
         organization_id = @current_user.organization_id
         branch_id = @current_user.branch_id
         role_id = params[:role_id]
-        result = AvailableUsersQueueService.new(
+        result = UserQueueService.new(
           organization_id: organization_id,
           branch_id: branch_id,
           role_name: 'agent'
-        ).call
+        ).queue.select { |user| user.work_state == 'available' }
 
         render json: result, status: :ok
       end
