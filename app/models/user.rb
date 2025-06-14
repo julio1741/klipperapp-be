@@ -60,7 +60,7 @@ class User < ApplicationRecord
 
   def push_user_if_needed
     # verify if user does not have any pending attendances
-    if attendances.where(status: [:pending, :processing]).where("start_working_at >= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day).empty?
+    if attendances.where(status: [:pending, :processing]).where("created_at >= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day).empty?
       self.class.push_user_to_queue(self.id)
     end
   end
