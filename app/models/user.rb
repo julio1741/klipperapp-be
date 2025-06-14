@@ -100,6 +100,10 @@ class User < ApplicationRecord
   end
 
   def set_today_users_list
+    self.class.set_today_users_list
+  end
+
+  def self.set_today_users_list
     today = Time.current.in_time_zone('America/Santiago').to_date
     redis_key = "user_rotation_list:org:#{organization_id}:branch:#{branch_id}:#{today}"
 
