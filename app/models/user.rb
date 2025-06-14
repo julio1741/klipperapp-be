@@ -59,7 +59,7 @@ class User < ApplicationRecord
       organization_id: self.organization_id,
       branch_id: self.branch_id,
       role_name: "agent")
-    assign_service.rotate(self.id)
+    assign_service.rotate(self)
   end
 
   def working_today?
