@@ -19,3 +19,5 @@ RUN gem install bundler:$BUNDLER_VERSION
 RUN bundle install
 
 COPY . .
+
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
