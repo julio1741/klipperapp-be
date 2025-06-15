@@ -19,5 +19,3 @@ RUN gem install bundler:$BUNDLER_VERSION
 RUN bundle install
 
 COPY . .
-
-CMD ["bash"]
