@@ -64,6 +64,22 @@ class Attendance < ApplicationRecord
       .exists?
   end
 
+  # Método para obtener attendances pendiente del día de hoy de un usuario
+  def self.pending_attendances_today_by_user(user_id)
+    today = Time.now.in_time_zone('America/Santiago').beginning_of_day
+    where(attended_by: user_id)
+      .where(status: [:pending, :processing])
+      .where("created_at >= ?", today)
+  end
+
+  # Método para obtener attendances pendientes del día de hoy
+  def self.pending_attendances_today
+    today = Time.now.in_time_zone('America/Santiago').beginning_of_day
+    where(status: [:pending, :processing])
+      .where("created_at >= ?", today)
+      .order(:created_at)
+  end
+
   # Método para cancelar attendances pendientes de días anteriores
   def self.cancel_old_pending_attendances
     where(status: [:pending, :processing])

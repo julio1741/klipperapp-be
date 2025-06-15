@@ -74,6 +74,11 @@ module Api
           role_name: 'agent'
         ).queue.select { |user| user.work_state == 'available' }
 
+        # select users without attendances pending today
+        result = result.select do |user|
+          Attendance.pending_attendances_today_by_user(user.id).empty?
+        end
+
         render json: result, status: :ok
       end
       # GET /api/v1/attendances/by_users_working_today
