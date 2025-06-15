@@ -4,7 +4,7 @@ services:
     env: docker
     plan: free
     dockerfilePath: ./Dockerfile
-    startCommand: bundle exec rails db:migrate && bundle exec puma -C config/puma.rb
+    startCommand: ./entrypoint.sh
 
   - type: worker
     name: rails-api-sidekiq
