@@ -5,8 +5,10 @@
 
 :schedule:
   cancel_old_attendances:
-    cron: "0 0 * * *" # Ejecutar todos los días a las 12:00 am
+    cron: "0 4 * * *" # Ejecutar todos los días a las 12:00 am
     class: "CancelOldAttendancesJob"
+    timezone: "America/Santiago"
   set_users_stand_by:
-    cron: "0 0 * * *" # Ejecutar todos los días a las 12:00 am
+    cron: "0 4 * * *" # Ejecutar todos los días a las 12:00 am
     class: "SetUsersStandByJob"
+    timezone: "America/Santiago"
