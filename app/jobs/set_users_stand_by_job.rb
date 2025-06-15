@@ -5,5 +5,6 @@ class SetUsersStandByJob
 
   def perform
     User.set_users_stand_by
+    Rails.cache.clear
   end
 end
