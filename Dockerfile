@@ -18,3 +18,5 @@ RUN gem install bundler:$BUNDLER_VERSION
 RUN bundle install
 
 COPY . .
+
+CMD ["bundle", "exec", "rails", "db:migrate" ,"&&", "bundle", "exec", "puma", "-C", "config/puma.rb"]

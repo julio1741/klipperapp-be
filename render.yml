@@ -4,7 +4,7 @@ services:
     env: docker
     plan: free
     dockerfilePath: ./Dockerfile
-    startCommand: /bin/bash -c "bundle exec rails db:migrate && bundle exec puma -C config/puma.rb"
+    startCommand: bundle exec rails db:migrate && bundle exec puma -C config/puma.rb
 
   - type: worker
     name: rails-api-sidekiq
