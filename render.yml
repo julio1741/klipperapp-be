@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: rails-api-web
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    startCommand: bundle exec puma -C config/puma.rb
+
+  - type: worker
+    name: rails-api-sidekiq
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    startCommand: bundle exec sidekiq
