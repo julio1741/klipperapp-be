@@ -19,4 +19,4 @@ RUN bundle install
 
 COPY . .
 
-CMD ["bundle", "exec", "rails", "db:migrate" ,"&&", "bundle", "exec", "puma", "-C", "config/puma.rb"]
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
