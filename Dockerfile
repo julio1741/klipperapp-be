@@ -1,7 +1,7 @@
 FROM ruby:3.2
 
 ENV BUNDLER_VERSION=2.4.22
-ENV RAILS_ENV=development
+ENV RAILS_ENV=production
 
 # 👇 Agrega las librerías necesarias para psych y otras gems nativas
 RUN apt-get update -qq && apt-get install -y \
