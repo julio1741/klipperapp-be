@@ -46,7 +46,7 @@ class User < ApplicationRecord
     end
 
     event :set_stand_by do
-      transitions from: [:working, :available, :not_available], to: :stand_by
+      transitions from: [:stand_by, :working, :available, :not_available], to: :stand_by
     end
 
     event :end_shift do
@@ -76,7 +76,7 @@ class User < ApplicationRecord
 
   # set users on stand by
   def self.set_users_stand_by
-    where(work_state: [:working, :available, :not_available]).each do |user|
+    where(work_state: [:stand_by, :working, :available, :not_available]).each do |user|
       user.update(start_working_at: nil)
       user.set_stand_by!
     end
