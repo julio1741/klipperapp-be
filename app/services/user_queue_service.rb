@@ -65,7 +65,8 @@ class UserQueueService
       .where('DATE(start_working_at) >= ?', @today)
       .order(:start_working_at)
       .pluck(:id)
-
+    puts "Building initial queue for #{@organization_id} - #{@branch_id} on #{@today}: #{user_ids.inspect}"
+    puts "Cache key: #{@cache_key}"
     Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
     user_ids
   end
