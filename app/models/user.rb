@@ -54,6 +54,14 @@ class User < ApplicationRecord
     end
   end
 
+  def add_user_to_queue
+    assign_service = UserQueueService.new(
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      role_name: "agent")
+    assign_service.add_user_to_queue(self)
+  end
+
   def rotate_user_from_queue
     assign_service = UserQueueService.new(
       organization_id: self.organization_id,
@@ -102,6 +110,7 @@ class User < ApplicationRecord
 
   def set_start_working_at
     self.start_working_at = Time.now.in_time_zone('America/Santiago')
+    add_user_to_queue
     save
   end
 

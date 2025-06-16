@@ -8,6 +8,13 @@ class UserQueueService
     @cache_key = "barber_queue:org:#{@organization_id}:branch:#{@branch_id}:#{@today}"
   end
 
+  def add_user_to_queue(user)
+    user_ids = Rails.cache.read(@cache_key) || []
+    return if user_ids.include?(user.id)
+    user_ids << user.id
+    Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
+  end
+
     # Devuelve la cola completa en orden actual
   def queue
     user_ids = Rails.cache.read(@cache_key)
