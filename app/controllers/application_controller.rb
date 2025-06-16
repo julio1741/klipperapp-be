@@ -10,6 +10,8 @@ class ApplicationController < ActionController::API
     token = header.split(' ').last if header.present?
 
     begin
+      Rails.logger.info "Authorizing token: #{token}"
+      Rails.logger.info "Key base: #{Rails.application.credentials.secret_key_base}"
       decoded = JWT.decode(token, Rails.application.credentials.secret_key_base)[0]
       raise JWT::ExpiredSignature if Time.at(decoded["exp"]) < Time.now
 
