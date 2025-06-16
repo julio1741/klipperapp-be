@@ -77,6 +77,7 @@ class User < ApplicationRecord
   # set users on stand by
   def self.set_users_stand_by
     where(work_state: [:working, :available, :not_available]).each do |user|
+      user.start_working_at = nil
       user.set_stand_by!
     end
   end
