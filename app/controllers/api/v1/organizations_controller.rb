@@ -43,6 +43,13 @@ module Api
         head :no_content
       end
 
+      def clean
+        Attendance.cancel_old_pending_attendances
+        User.set_users_stand_by
+        Rails.cache.clear
+        render json: { message: 'Entities cleaned successfully' }, status: :ok
+      end
+
       private
 
       def set_organization
