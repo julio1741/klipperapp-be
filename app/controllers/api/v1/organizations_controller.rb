@@ -2,7 +2,7 @@ module Api
   module V1
     class OrganizationsController < ApplicationController
       before_action :set_organization, only: [:show, :update, :destroy]
-      before_action :authorize_request, only: [:clean, :build_queue]
+      before_action :authorize_request, only: [:clean, :build_queue, :show_queue, :build_queue]
 
       def index
         if params[:slug].present?
