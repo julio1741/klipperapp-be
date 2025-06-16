@@ -45,7 +45,7 @@ Rails.application.routes.draw do
       end
       post 'clean', to: 'organizations#clean'
       post 'build_queue', to: 'organizations#build_queue'
-      post 'show_queue', to: 'organizations#show_queue'
+      get 'show_queue', to: 'organizations#show_queue'
       post 'login', to: 'auth#login'
       get 'me', to: 'auth#me'
     end
