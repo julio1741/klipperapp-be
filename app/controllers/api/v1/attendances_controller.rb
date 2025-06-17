@@ -57,6 +57,7 @@ module Api
       # PATCH/PUT /api/v1/attendances/:id
       def update
         if @attendance.update(attendance_params)
+          @attendance.services << Service.where(id: params[:service_ids]) if params[:service_ids].present?
           render json: @attendance, status: :ok
         else
           render json: @attendance.errors, status: :unprocessable_entity
