@@ -3,10 +3,11 @@ class Attendance < ApplicationRecord
   include Filterable
 
   belongs_to :profile
-  belongs_to :service
   belongs_to :organization
   belongs_to :branch
   belongs_to :attended_by_user, class_name: "User", foreign_key: :attended_by, optional: true
+
+  has_and_belongs_to_many :services
 
   after_create :set_attended_by, if: -> { attended_by.nil? }
   # update user list after destroy

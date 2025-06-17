@@ -7,14 +7,14 @@ module Api
       # GET /api/v1/attendances
       def index
         @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
-          .where(status: [:pending, :processing, :completed, :finished])
+          .where(status: [:pending, :processing, :completed, :finished, :canceled])
           .order(:created_at)
 
         render json: @attendances.map { |attendance|
           attendance.as_json(include: {
             attended_by_user: {},
             profile: {},
-            service: {}
+            services: []
           })
         }
       end
@@ -29,20 +29,25 @@ module Api
           attendance.as_json(include: {
             attended_by_user: {},
             profile: {},
-            service: {}
+            services: []
           })
         }
       end
 
       # GET /api/v1/attendances/:id
       def show
-        render json: @attendance
+        render json: @attendance.as_json(include: {
+          attended_by_user: {},
+          profile: {},
+          services: []
+        })
       end
 
       # POST /api/v1/attendances
       def create
         @attendance = Attendance.new(attendance_params)
         if @attendance.save
+          @attendance.services << Service.where(id: params[:service_ids]) if params[:service_ids].present?
           render json: @attendance, status: :created
         else
           render json: @attendance.errors, status: :unprocessable_entity
@@ -52,7 +57,7 @@ module Api
       # PATCH/PUT /api/v1/attendances/:id
       def update
         if @attendance.update(attendance_params)
-          render json: @attendance
+          render json: @attendance, status: :ok
         else
           render json: @attendance.errors, status: :unprocessable_entity
         end
@@ -136,7 +141,6 @@ module Api
           :date,
           :time,
           :profile_id,
-          :service_id,
           :organization_id,
           :branch_id,
           :attended_by,
@@ -145,7 +149,8 @@ module Api
           :user_amount,
           :organization_amount,
           :start_attendance_at,
-          :end_attendance_at
+          :end_attendance_at,
+          service_ids: []
         )
       end
     end
