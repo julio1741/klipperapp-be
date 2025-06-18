@@ -14,7 +14,8 @@ module Api
           attendance.as_json(include: {
             attended_by_user: {},
             profile: {},
-            services: []
+            services: [],
+            child_attendances: []
           })
         }
       end
@@ -29,7 +30,8 @@ module Api
           attendance.as_json(include: {
             attended_by_user: {},
             profile: {},
-            services: []
+            services: [],
+            child_attendances: []
           })
         }
       end
@@ -39,7 +41,8 @@ module Api
         render json: @attendance.as_json(include: {
           attended_by_user: {},
           profile: {},
-          services: []
+          services: [],
+          child_attendances: []
         })
       end
 
@@ -48,6 +51,7 @@ module Api
         @attendance = Attendance.new(attendance_params)
         if @attendance.save
           @attendance.services << Service.where(id: params[:service_ids]) if params[:service_ids].present?
+          @attendance.child_attendances = Attendance.where(id: params[:child_attendance_ids]) if params[:child_attendance_ids].present?
           render json: @attendance, status: :created
         else
           render json: @attendance.errors, status: :unprocessable_entity
@@ -58,6 +62,7 @@ module Api
       def update
         if @attendance.update(attendance_params)
           @attendance.services << Service.where(id: params[:service_ids]) if params[:service_ids].present?
+          @attendance.child_attendances = Attendance.where(id: params[:child_attendance_ids]) if params[:child_attendance_ids].present?
           render json: @attendance, status: :ok
         else
           render json: @attendance.errors, status: :unprocessable_entity

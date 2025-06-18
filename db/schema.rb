@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_17_203830) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_18_200804) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -33,8 +33,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_17_203830) do
     t.integer "total_amount"
     t.string "trx_number"
     t.string "payment_method"
+    t.integer "parent_attendance_id"
     t.index ["branch_id"], name: "index_attendances_on_branch_id"
     t.index ["organization_id"], name: "index_attendances_on_organization_id"
+    t.index ["parent_attendance_id"], name: "index_attendances_on_parent_attendance_id"
     t.index ["profile_id"], name: "index_attendances_on_profile_id"
   end
 

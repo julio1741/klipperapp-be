@@ -9,6 +9,11 @@ class Attendance < ApplicationRecord
 
   has_and_belongs_to_many :services
 
+  # Relación jerárquica para agrupar attendances
+  belongs_to :parent_attendance, class_name: "Attendance", optional: true
+  has_many :child_attendances, class_name: "Attendance", foreign_key: :parent_attendance_id, dependent: :nullify
+
+
   after_create :set_attended_by, if: -> { attended_by.nil? }
   # update user list after destroy
 
