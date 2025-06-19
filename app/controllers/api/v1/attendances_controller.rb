@@ -25,7 +25,7 @@ module Api
         today = Time.now.in_time_zone('America/Santiago').beginning_of_day
         @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
           .where(status: [:pending, :processing, :completed, :finished, :canceled])
-          .where("created_at >= ?", today)
+          .where("created_at >= ?", today).order(id: :asc)
         render json: @attendances.map { |attendance|
           attendance.as_json(include: {
             attended_by_user: {},
@@ -51,8 +51,13 @@ module Api
         @attendance = Attendance.new(attendance_params)
         if @attendance.save
           @attendance.services << Service.where(id: params[:service_ids]) if params[:service_ids].present?
-          @attendance.child_attendances = Attendance.where(id: params[:child_attendance_ids]) if params[:child_attendance_ids].present?
-          render json: @attendance, status: :created
+          @attendance.child_attendances << Attendance.where(id: params[:child_attendance_ids]) if params[:child_attendance_ids].present?
+          render json: @attendance.as_json(include: {
+          attended_by_user: {},
+          profile: {},
+          services: [],
+          child_attendances: []
+        }), status: :ok
         else
           render json: @attendance.errors, status: :unprocessable_entity
         end
@@ -62,8 +67,13 @@ module Api
       def update
         if @attendance.update(attendance_params)
           @attendance.services << Service.where(id: params[:service_ids]) if params[:service_ids].present?
-          @attendance.child_attendances = Attendance.where(id: params[:child_attendance_ids]) if params[:child_attendance_ids].present?
-          render json: @attendance, status: :ok
+          @attendance.child_attendances << Attendance.where(id: params[:child_attendance_ids]) if params[:child_attendance_ids].present?
+          render json: @attendance.as_json(include: {
+          attended_by_user: {},
+          profile: {},
+          services: [],
+          child_attendances: []
+        }), status: :ok
         else
           render json: @attendance.errors, status: :unprocessable_entity
         end
