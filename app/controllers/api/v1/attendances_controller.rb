@@ -25,7 +25,8 @@ module Api
         today = Time.now.in_time_zone('America/Santiago').beginning_of_day
         @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
           .where(status: [:pending, :processing, :completed, :finished, :canceled])
-          .where("created_at >= ?", today).order(id: :asc)
+          .where("created_at >= ?", today)
+          .order(:status, id: :asc)
         render json: @attendances.map { |attendance|
           attendance.as_json(include: {
             attended_by_user: {},
