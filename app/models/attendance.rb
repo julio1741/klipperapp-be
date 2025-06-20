@@ -61,6 +61,13 @@ class Attendance < ApplicationRecord
     save
   end
 
+  def set_profile__last_attended_date profile_id
+    profile = Profile.find_by(id: profile_id)
+    if profile
+      profile.touch(:last_attendance_at)
+    end
+  end
+
   # Metodo para obtener si un profile ya esta en un attendance en proceso o pendiente del día de hoy
   def self.profile_in_attendance_today?(profile_id)
     today = Time.now.in_time_zone('America/Santiago').beginning_of_day
