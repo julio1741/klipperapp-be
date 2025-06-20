@@ -159,7 +159,7 @@ module Api
         params.require(:attendance).permit(
           :discount, :extra_discount,
           :user_amount, :organization_amount, :total_amount, :trx_number,
-          :payment_method
+          :payment_method, service_ids: [], child_attendance_ids: []
         )
       end
 
