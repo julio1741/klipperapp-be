@@ -26,7 +26,13 @@ module Api
         @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
           .where(status: [:pending, :processing, :completed, :finished, :canceled])
           .where("created_at >= ?", today)
-          .order(:status, id: :asc)
+          .order(Arel.sql("CASE status
+            WHEN 'pending' THEN 1
+            WHEN 'processing' THEN 2
+            WHEN 'completed' THEN 3
+            WHEN 'finished' THEN 4
+            WHEN 'canceled' THEN 5
+            ELSE 6 END, id ASC"))
         render json: @attendances.map { |attendance|
           attendance.as_json(include: {
             attended_by_user: {},
