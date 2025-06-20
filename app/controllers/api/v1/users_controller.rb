@@ -120,7 +120,7 @@ module Api
 
         if @user.end_attendance!
           attendance.complete! if attendance.may_complete?
-          attendance.set_profile_last_attended_date(@attendance.profile_id)
+          attendance.set_profile_last_attended_date(attendance.profile_id)
           render json: { message: "El barbero terminó de atender" }, status: :ok
         else
           render json: { error: "No se pudo cambiar el estado a 'available'" }, status: :unprocessable_entity
