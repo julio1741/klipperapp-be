@@ -168,7 +168,7 @@ module Api
           :name, :email, :phone_number, :address_line1, :address_line2,
           :city, :state, :zip_code, :country, :role_id, :branch_id,
           :organization_id, :active, :password, :password_confirmation,
-          branch_ids: []
+          :photo_url, branch_ids: []
         )
       end
     end

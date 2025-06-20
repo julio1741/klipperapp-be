@@ -76,7 +76,7 @@ module Api
       end
 
       def organization_params
-        params.require(:organization).permit(:name, :slug, :bio, metadata: {})
+        params.require(:organization).permit(:name, :slug, :bio, :photo_url, metadata: {})
       end
     end
   end

@@ -53,7 +53,8 @@ module Api
           :phone_number,
           :email,
           :active,
-          :organization_id
+          :organization_id,
+          :photo_url
         )
       end
     end

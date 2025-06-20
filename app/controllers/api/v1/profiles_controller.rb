@@ -59,7 +59,8 @@ module Api
           :birth_date,
           :phone_number,
           :organization_id,
-          :branch_id
+          :branch_id,
+          :photo_url
         )
       end
     end

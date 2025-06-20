@@ -49,7 +49,8 @@ module Api
           :price,
           :branch_id,
           :duration,
-          :active
+          :active,
+          :photo_url
         )
       end
     end
