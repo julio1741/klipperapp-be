@@ -61,7 +61,7 @@ class Attendance < ApplicationRecord
     save
   end
 
-  def set_profile__last_attended_date profile_id
+  def set_profile_last_attended_date profile_id
     profile = Profile.find_by(id: profile_id)
     if profile
       profile.touch(:last_attendance_at)
