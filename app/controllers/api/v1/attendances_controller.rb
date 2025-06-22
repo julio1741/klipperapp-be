@@ -7,7 +7,7 @@ module Api
       # GET /api/v1/attendances
       def index
         @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
-          .where(status: [:pending, :processing, :completed, :finished, :canceled])
+          .where(status: [:pending, :processing, :completed, :finished, :canceled, :postponed])
           .order(:created_at)
 
         render json: @attendances.map { |attendance|
@@ -24,14 +24,15 @@ module Api
       def today
         today = Time.now.in_time_zone('America/Santiago').beginning_of_day
         @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
-          .where(status: [:pending, :processing, :completed, :finished, :canceled])
+          .where(status: [:pending, :processing, :completed, :finished, :canceled, :postponed])
           .where("created_at >= ?", today)
           .order(Arel.sql("CASE status
             WHEN 'pending' THEN 1
             WHEN 'processing' THEN 2
-            WHEN 'completed' THEN 3
-            WHEN 'finished' THEN 4
-            WHEN 'canceled' THEN 5
+            WHEN 'postponed' THEN 3
+            WHEN 'completed' THEN 4
+            WHEN 'finished' THEN 5
+            WHEN 'canceled' THEN 6
             ELSE 6 END, id ASC"))
         render json: @attendances.map { |attendance|
           attendance.as_json(include: {
@@ -127,7 +128,7 @@ module Api
 
         result = users.map do |user|
           attendances = Attendance.includes(:profile)
-            .where(attended_by: user.id, status: [:pending, :processing])
+            .where(attended_by: user.id, status: [:pending, :processing, :postponed])
             .order(:created_at)
 
           {

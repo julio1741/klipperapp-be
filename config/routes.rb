@@ -35,6 +35,9 @@ Rails.application.routes.draw do
           post 'start_attendance', to: 'users#start_attendance'
           post 'end_attendance', to: 'users#end_attendance'
           post 'finish_attendance', to: 'users#finish_attendance'
+          post 'postpone_attendance', to: 'users#postpone_attendance'
+          post 'resume_attendance', to: 'users#resume_attendance'
+          post 'cancel_attendance', to: 'users#cancel_attendance'
         end
       end
 

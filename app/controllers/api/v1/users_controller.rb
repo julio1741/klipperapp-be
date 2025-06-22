@@ -144,6 +144,55 @@ module Api
         render json: { message: "Asistencia finalizada correctamente" }, status: :ok
       end
 
+      def postpone_attendance
+        user_id = params[:user_id].presence
+        attendance_id = params[:attendance_id].presence
+        return render json: { error: "Falta user_id o attendance_id" }, status: :bad_request unless user_id && attendance_id
+        @user = User.find_by(id: user_id)
+        return render json: { error: "Usuario no encontrado" }, status: :not_found unless @user
+        attendance = Attendance.find_by(id: attendance_id)
+        return render json: { error: "Asistencia no encontrada" }, status: :not_found unless attendance
+
+        if attendance.may_postpone?
+          attendance.postpone!
+          render json: { message: "Asistencia pospuesta correctamente" }, status: :ok
+        else
+          render json: { error: "No se puede posponer esta asistencia" }, status: :unprocessable_entity
+        end
+      end
+
+      def resume_attendance
+        user_id = params[:user_id].presence
+        attendance_id = params[:attendance_id].presence
+        return render json: { error: "Falta user_id o attendance_id" }, status: :bad_request unless user_id && attendance_id
+        @user = User.find_by(id: user_id)
+        return render json: { error: "Usuario no encontrado" }, status: :not_found unless @user
+        attendance = Attendance.find_by(id: attendance_id)
+        return render json: { error: "Asistencia no encontrada" }, status: :not_found unless attendance
+        if attendance.may_resume?
+          attendance.resume!
+          render json: { message: "Asistencia reanudada correctamente" }, status: :ok
+        else
+          render json: { error: "No se puede reanudar esta asistencia" }, status: :unprocessable_entity
+        end
+      end
+
+      def cancel_attendance
+        user_id = params[:user_id].presence
+        attendance_id = params[:attendance_id].presence
+        return render json: { error: "Falta user_id o attendance_id" }, status: :bad_request unless user_id && attendance_id
+        @user = User.find_by(id: user_id)
+        return render json: { error: "Usuario no encontrado" }, status: :not_found unless @user
+        attendance = Attendance.find_by(id: attendance_id)
+        return render json: { error: "Asistencia no encontrada" }, status: :not_found unless attendance
+        if attendance.may_cancel?
+          attendance.cancel!
+          render json: { message: "Asistencia cancelada correctamente" }, status: :ok
+        else
+          render json: { error: "No se puede cancelar esta asistencia" }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def set_user

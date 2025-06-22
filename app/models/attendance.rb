@@ -22,6 +22,7 @@ class Attendance < ApplicationRecord
     state :processing
     state :completed
     state :finished
+    statte :postponed
     state :canceled
 
     event :start do
@@ -34,6 +35,14 @@ class Attendance < ApplicationRecord
 
     event :finish do
       transitions from: [:completed, :processing], to: :finished
+    end
+
+    event :postpone do
+      transitions from: [:pending, :processing], to: :postponed
+    end
+
+    event :resume do
+      transitions from: :postponed, to: :pending
     end
 
     event :cancel do
@@ -72,7 +81,7 @@ class Attendance < ApplicationRecord
   def self.profile_in_attendance_today?(profile_id)
     today = Time.now.in_time_zone('America/Santiago').beginning_of_day
     where(profile_id: profile_id)
-      .where(status: [:pending, :processing])
+      .where(status: [:pending, :processing, :postponed])
       .where("created_at >= ?", today)
       .exists?
   end
@@ -81,21 +90,21 @@ class Attendance < ApplicationRecord
   def self.pending_attendances_today_by_user(user_id)
     today = Time.now.in_time_zone('America/Santiago').beginning_of_day
     where(attended_by: user_id)
-      .where(status: [:pending, :processing])
+      .where(status: [:pending, :processing, :postponed])
       .where("created_at >= ?", today)
   end
 
   # Método para obtener attendances pendientes del día de hoy
   def self.pending_attendances_today
     today = Time.now.in_time_zone('America/Santiago').beginning_of_day
-    where(status: [:pending, :processing])
+    where(status: [:pending, :processing, :postponed])
       .where("created_at >= ?", today)
       .order(:created_at)
   end
 
   # Método para cancelar attendances pendientes de días anteriores
   def self.cancel_old_pending_attendances
-    where(status: [:pending, :processing])
+    where(status: [:pending, :processing, :postponed])
       .where("created_at <= ?", Time.now.in_time_zone('America/Santiago').end_of_day)
       .find_each do |attendance|
         attendance.cancel!
