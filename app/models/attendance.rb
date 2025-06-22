@@ -46,7 +46,7 @@ class Attendance < ApplicationRecord
     end
 
     event :cancel do
-      transitions from: [:pending, :processing, :completed], to: :canceled
+      transitions from: [:pending, :processing, :completed, :postponed], to: :canceled
     end
   end
 
