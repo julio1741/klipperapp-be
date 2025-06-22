@@ -5,11 +5,11 @@ module Api
 
       def index
         @users = @filtered_records || User.includes(:branches).all
-        render json: @users
+        render json: @users.as_json(include: { role: {} })
       end
 
       def show
-        render json: @user
+        render json: @users.as_json(include: { role: {} })
       end
 
       def create
@@ -58,7 +58,7 @@ module Api
 
         @users = User.users_working_today(organization_id, branch_id, role_id)
 
-        render json: @users, status: :ok
+        render json: @users.as_json(include: { role: {} }), status: :ok
       end
 
       def start_day

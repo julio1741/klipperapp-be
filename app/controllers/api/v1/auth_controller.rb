@@ -17,7 +17,7 @@ module Api
 
       def me
         if authorize_request
-          render json: @current_user
+            render json: @current_user.as_json(include: { role: {} })
         end
       end
 
