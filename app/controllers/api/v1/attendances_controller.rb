@@ -127,9 +127,9 @@ module Api
         ).order(:start_working_at)
 
         result = users.map do |user|
-          attendances = Attendance.includes(:profile)
+            attendances = Attendance.includes(:profile)
             .where(attended_by: user.id, status: [:pending, :processing, :postponed])
-            .order(:created_at)
+            .order(Arel.sql("CASE status WHEN 'processing' THEN 1 WHEN 'postponed' THEN 2 WHEN 'pending' THEN 3 END, created_at ASC"))
 
           {
             user: user,
