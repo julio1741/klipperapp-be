@@ -180,12 +180,14 @@ module Api
       def cancel_attendance
         user_id = params[:user_id].presence
         attendance_id = params[:attendance_id].presence
+        comments = params[:comments].presence
         return render json: { error: "Falta user_id o attendance_id" }, status: :bad_request unless user_id && attendance_id
         @user = User.find_by(id: user_id)
         return render json: { error: "Usuario no encontrado" }, status: :not_found unless @user
         attendance = Attendance.find_by(id: attendance_id)
         return render json: { error: "Asistencia no encontrada" }, status: :not_found unless attendance
         if attendance.may_cancel?
+          attendance.comments = comments if comments
           attendance.cancel!
           render json: { message: "Asistencia cancelada correctamente" }, status: :ok
         else

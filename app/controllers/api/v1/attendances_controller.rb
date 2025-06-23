@@ -58,7 +58,7 @@ module Api
       def create
         @attendance = Attendance.new(attendance_params)
         if @attendance.save
-          @attendance.services << Service.where(id: params[:service_ids]) if params[:service_ids].present?
+          @attendance.services = Service.where(id: params[:service_ids]) if params[:service_ids].present?
           @attendance.child_attendances << Attendance.where(id: params[:child_attendance_ids]) if params[:child_attendance_ids].present?
           render json: @attendance.as_json(include: {
           attended_by_user: {},
@@ -74,7 +74,7 @@ module Api
       # PATCH/PUT /api/v1/attendances/:id
       def update
         if @attendance.update(attendance_params)
-          @attendance.services << Service.where(id: params[:service_ids]) if params[:service_ids].present?
+          @attendance.services = Service.where(id: params[:service_ids]) if params[:service_ids].present?
           @attendance.child_attendances << Attendance.where(id: params[:child_attendance_ids]) if params[:child_attendance_ids].present?
           render json: @attendance.as_json(include: {
           attended_by_user: {},
@@ -151,6 +151,16 @@ module Api
         end
 
         render json: result, status: :ok
+      end
+
+      def statistics
+        year = params[:year]
+        month = params[:month]
+        day = params[:day]
+
+        stats = Statistics.new(year: year, month: month, day: day).perform
+
+        render json: stats, status: :ok
       end
 
       private
