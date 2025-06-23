@@ -22,7 +22,7 @@ class Attendance < ApplicationRecord
     state :processing
     state :completed
     state :finished
-    statte :postponed
+    state :postponed
     state :canceled
 
     event :start do

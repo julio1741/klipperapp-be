@@ -1,6 +1,7 @@
 module Api
   module V1
     class AuthController < ApplicationController
+      before_action :authorize_request, only: [:me]
       def login
         user = User.find_by(email: params[:email])
 
@@ -16,9 +17,7 @@ module Api
       end
 
       def me
-        if authorize_request
-            render json: @current_user.as_json(include: { role: {} })
-        end
+        render json: @current_user.as_json(include: { role: {} })
       end
 
       private
