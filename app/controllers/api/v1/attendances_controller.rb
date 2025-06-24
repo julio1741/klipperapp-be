@@ -51,7 +51,7 @@ module Api
         @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
           .where(status: [:completed, :finished, :canceled])
           .where("created_at <= ?", yesterday)
-          order("#{sort} DESC")
+          order("#{sort} ASC")
         render json: @attendances.map { |attendance|
           attendance.as_json(include: {
             attended_by_user: {},
