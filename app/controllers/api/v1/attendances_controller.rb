@@ -44,6 +44,24 @@ module Api
         }
       end
 
+      # GET /api/v1/attendances/history
+      def history
+        yesterday = Time.now.in_time_zone('America/Santiago').beginning_of_day
+        sort = params[:sort] || 'created_at'
+        @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
+          .where(status: [:completed, :finished, :canceled])
+          .where("created_at <= ?", yesterday)
+          order("#{sort} DESC"))
+        render json: @attendances.map { |attendance|
+          attendance.as_json(include: {
+            attended_by_user: {},
+            profile: {},
+            services: [],
+            child_attendances: []
+          })
+        }
+      end
+
       # GET /api/v1/attendances/:id
       def show
         render json: @attendance.as_json(include: {

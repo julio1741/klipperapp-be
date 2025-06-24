@@ -19,6 +19,7 @@ Rails.application.routes.draw do
           get 'by_users_working_today', to: 'attendances#by_users_working_today'
           get 'by_users_queue', to: 'attendances#by_users_queue'
           get 'today', to: 'attendances#today'
+          get 'history', to: 'attendances#history'
           get 'statistics', to: 'attendances#statistics'
         end
       end
