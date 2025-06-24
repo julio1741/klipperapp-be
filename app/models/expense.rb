@@ -1,6 +1,6 @@
 class Expense < ApplicationRecord
   belongs_to :organization
-  belongs_to :user
+  belongs_to :user, optional: true
   belongs_to :branch
 
   validates :description, presence: true
