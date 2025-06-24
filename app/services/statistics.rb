@@ -1,11 +1,11 @@
 class Statistics
-  def initialize(year: nil, month: nil, day: nil, organization: nil, branch: nil, user: nil)
+  def initialize(year: nil, month: nil, day: nil, organization_id: nil, branch_id: nil, user_id: nil)
     @year = year
     @month = month
     @day = day
-    @organization = organization
-    @branch = branch
-    @user = user
+    @organization = Organization.find_by(id: organization_id) if organization_id
+    @branch = Branch.find_by(id: branch_id) if branch_id
+    @user = User.find_by(id: user_id) if user_id
   end
 
   def perform
