@@ -3,9 +3,9 @@ class Statistics
     @year = year
     @month = month
     @day = day
-    @organization_id
-    @branch_id
-    @user_id
+    @organization_id = organization_id
+    @branch_id = branch_id
+    @user_id = user_id
   end
 
   def perform
