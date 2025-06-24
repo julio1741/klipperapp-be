@@ -15,7 +15,8 @@ class Statistics
       total_profiles: total_profiles(attendances),
       total_new_profiles: total_new_profiles(attendances),
       total_concurrent_profiles: total_concurrent_profiles(attendances),
-      most_services: most_services(attendances)
+      most_services: most_services(attendances),
+      total_attendances: attendances.count,
     }
   end
 
