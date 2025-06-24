@@ -14,7 +14,7 @@ class Attendance < ApplicationRecord
   has_many :child_attendances, class_name: "Attendance", foreign_key: :parent_attendance_id, dependent: :nullify
 
 
-  after_create :set_attended_by, if: -> { attended_by.nil? }
+  after_create :set_attended_by
   # update user list after destroy
 
   aasm column: :status do
@@ -65,8 +65,12 @@ class Attendance < ApplicationRecord
       organization_id: self.organization_id,
       branch_id: self.branch_id,
       role_name: "agent") # Buscar otra forma de obtener el role id
-    user = assign_service.next_available
-    self.attended_by = user.id if user
+    if attended_by.nil?
+      user = assign_service.next_available
+      self.attended_by = user.id if user
+    else
+      assign_service.rotate(self.attended_by_user)
+    end
     save
   end
 
