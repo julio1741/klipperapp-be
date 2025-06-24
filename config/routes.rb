@@ -26,6 +26,7 @@ Rails.application.routes.draw do
       resources :profiles
       resources :roles
       resources :services
+      resources :expenses
 
       resources :users do
         collection do
