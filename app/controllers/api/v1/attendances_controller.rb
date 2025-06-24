@@ -48,11 +48,11 @@ module Api
       def history
         yesterday = Time.now.in_time_zone('America/Santiago').beginning_of_day
         sort = params[:sort] || 'created_at'
-        order = params[:order] || 'desc'
+        dir = params[:dir] || 'desc'
         @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
           .where(status: [:completed, :finished, :canceled])
           .where("created_at <= ?", yesterday)
-          .order("#{sort} #{order}")
+          .order("#{sort} #{dir}")
         render json: @attendances.map { |attendance|
           attendance.as_json(include: {
             attended_by_user: {},
