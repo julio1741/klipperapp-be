@@ -18,9 +18,6 @@ module Api
       # POST /api/v1/expenses
       def create
         @expense = Expense.new(expense_params)
-        @expense.organization_id = @current_user.organization_id
-        @expense.user_id = @current_user.id
-
         if @expense.save
           render json: @expense, status: :created
         else
@@ -50,7 +47,7 @@ module Api
       end
 
       def expense_params
-        params.require(:expense).permit(:description, :amount)
+        params.require(:expense).permit(:description, :amount, :organization_id, :user_id, :branch_id, :quantity)
       end
     end
   end
