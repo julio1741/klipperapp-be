@@ -29,15 +29,15 @@ class Statistics
     scope = scope.where(attended_by: @user_id) if @user_id
 
     if @year
-      scope = scope.where("EXTRACT(YEAR FROM attendances.created_at) = ?", @year)
+      scope = scope.where("EXTRACT(YEAR FROM attendances.created_at) = ?", @year.to_i)
     end
 
     if @month
-      scope = scope.where("EXTRACT(MONTH FROM attendances.created_at) = ?", @month)
+      scope = scope.where("EXTRACT(MONTH FROM attendances.created_at) = ?", @month.to_i)
     end
 
     if @day
-      scope = scope.where("EXTRACT(DAY FROM attendances.created_at) = ?", @day)
+      scope = scope.where("EXTRACT(DAY FROM attendances.created_at) = ?", @day.to_i)
     end
 
     scope
