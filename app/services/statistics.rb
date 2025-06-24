@@ -3,9 +3,9 @@ class Statistics
     @year = year
     @month = month
     @day = day
-    @organization = Organization.find_by(id: organization_id) if organization_id
-    @branch = Branch.find_by(id: branch_id) if branch_id
-    @user = User.find_by(id: user_id) if user_id
+    @organization_id
+    @branch_id
+    @user_id
   end
 
   def perform
@@ -24,9 +24,9 @@ class Statistics
 
   def filter_attendances
     scope = Attendance.all
-    scope = scope.where(organization_id: @organization.id) if @organization
-    scope = scope.where(branch_id: @branch.id) if @branch
-    scope = scope.where(attended_by: @user.id) if @user
+    scope = scope.where(organization_id: @organization_id) if @organization_id
+    scope = scope.where(branch_id: @branch_id) if @branch_id
+    scope = scope.where(attended_by: @user_id) if @user_id
 
     if @year
       scope = scope.where("EXTRACT(YEAR FROM attendances.created_at) = ?", @year)
