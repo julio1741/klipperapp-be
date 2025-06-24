@@ -1,8 +1,11 @@
 class Statistics
-  def initialize(year: nil, month: nil, day: nil)
+  def initialize(year: nil, month: nil, day: nil, organization: nil, branch: nil, user: nil)
     @year = year
     @month = month
     @day = day
+    @organization = organization
+    @branch = branch
+    @user = user
   end
 
   def perform
@@ -20,6 +23,9 @@ class Statistics
 
   def filter_attendances
     scope = Attendance.all
+    scope = scope.where(organization_id: @organization.id) if @organization
+    scope = scope.where(branch_id: @branch.id) if @branch
+    scope = scope.where(attended_by: @user.id) if @user
 
     if @year
       scope = scope.where("EXTRACT(YEAR FROM attendances.created_at) = ?", @year)

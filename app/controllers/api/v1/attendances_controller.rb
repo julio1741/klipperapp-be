@@ -157,8 +157,17 @@ module Api
         year = params[:year]
         month = params[:month]
         day = params[:day]
+        organization_id = params[:organization_id]
+        branch_id = params[:branch_id]
+        user_id = params[:user_id]
 
-        stats = Statistics.new(year: year, month: month, day: day).perform
+        stats = Statistics.new(year: year,
+          month: month,
+          day: day,
+          organization_id: organization_id,
+          branch_id: branch_id,
+          user_id: user_id
+        ).perform
 
         render json: stats, status: :ok
       end
