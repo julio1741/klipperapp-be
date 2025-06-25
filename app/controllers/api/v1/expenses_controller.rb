@@ -6,7 +6,7 @@ module Api
 
       # GET /api/v1/expenses
       def index
-        @expenses = Expense.where(organization_id: @current_user.organization_id)
+        @expenses = (@filtered_records || Expense).where(organization_id: @current_user.organization_id)
         render json: @expenses, status: :ok
       end
 
