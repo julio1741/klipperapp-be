@@ -27,14 +27,16 @@ class PaymentService
   private
 
   def fetch_attendances
-    scope = Attendance.where(attended_by: @user_id, status: 'completed')
+    scope = Attendance.where(status: 'finished')
+    scope = scope.where(attended_by: @user_id) if @user_id.present?
     scope = scope.where(branch_id: @branch_id) if @branch_id.present?
     scope = scope.where(organization_id: @organization_id) if @organization_id.present?
     scope.where(created_at: @start_date.beginning_of_day..@end_date.end_of_day)
   end
 
   def fetch_expenses
-    scope = Expense.where(user_id: @user_id)
+    scope = Expense
+    scope = scope.where(user_id: @user_id) if @user_id.present?
     scope = scope.where(branch_id: @branch_id) if @branch_id.present?
     scope = scope.where(organization_id: @organization_id) if @organization_id.present?
     scope.where(created_at: @start_date.beginning_of_day..@end_date.end_of_day)
