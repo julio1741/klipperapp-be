@@ -1,4 +1,6 @@
 class Expense < ApplicationRecord
+  self.inheritance_column = :_type_disabled # Desactiva STI para la columna `type`
+
   belongs_to :organization
   belongs_to :user, optional: true
   belongs_to :branch
