@@ -41,6 +41,7 @@ Rails.application.routes.draw do
           post 'postpone_attendance', to: 'users#postpone_attendance'
           post 'resume_attendance', to: 'users#resume_attendance'
           post 'cancel_attendance', to: 'users#cancel_attendance'
+          get 'calculate_payment', to: 'users#calculate_payment'
         end
       end
 

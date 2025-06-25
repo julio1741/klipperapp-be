@@ -195,6 +195,24 @@ module Api
         end
       end
 
+      def calculate_payment
+        start_date = params[:start_date]
+        end_date = params[:end_date]
+        user_id = params[:user_id]
+        branch_id = params[:branch_id]
+        organization_id = params[:organization_id]
+
+        result = PaymentService.new(
+          start_date: start_date,
+          end_date: end_date,
+          user_id: user_id,
+          branch_id: branch_id,
+          organization_id: organization_id
+        ).perform
+
+        render json: result, status: :ok
+      end
+
       private
 
       def set_user
