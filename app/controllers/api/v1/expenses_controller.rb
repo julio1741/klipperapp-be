@@ -47,7 +47,7 @@ module Api
       end
 
       def expense_params
-        params.require(:expense).permit(:description, :amount, :organization_id, :user_id, :branch_id, :quantity)
+        params.require(:expense).permit(:description, :amount, :organization_id, :user_id, :branch_id, :quantity, :type)
       end
     end
   end
