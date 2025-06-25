@@ -1,11 +1,11 @@
 class PaymentService
-  def initialize(start_date:, end_date:, branch_id: nil, organization_id: nil, user_id: nil, role_id: nil)
+  def initialize(start_date:, end_date:, branch_id: nil, organization_id: nil, user_id: nil, role_name: nil)
     @start_date = start_date.to_date
     @end_date = end_date.to_date
     @user_id = user_id
     @branch_id = branch_id
     @organization_id = organization_id
-    @role_id = role_id
+    @role_name = role_name
   end
 
   def perform
@@ -37,7 +37,10 @@ class PaymentService
     scope = User.all
     scope = scope.where(id: @user_id) if @user_id.present?
     scope = scope.where(branch_id: @branch_id) if @branch_id.present?
-    scope = scope.where(role_id: @role_id) if @role_id.present?
+    if @role_name.present?
+      role = Role.find_by(name: @role_name)
+      scope = scope.where(role_id: role.id) if role.present?
+    end
     scope = scope.where(organization_id: @organization_id) if @organization_id.present?
     scope
   end

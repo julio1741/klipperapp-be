@@ -201,14 +201,14 @@ module Api
         user_id = params[:user_id]
         branch_id = params[:branch_id]
         organization_id = params[:organization_id]
-        role_id = params[:role_id]
+        role_name = params[:role_name]
 
         result = PaymentService.new(
           start_date: start_date,
           end_date: end_date,
           user_id: user_id,
           branch_id: branch_id,
-          role_id: role_id,
+          role_name: role_name,
           organization_id: organization_id
         ).perform
 
