@@ -215,6 +215,44 @@ module Api
         render json: result, status: :ok
       end
 
+      # POST /api/v1/users/reset_password
+      def reset_password
+        user = User.find_by(email: params[:email])
+        unless user
+          render json: { error: 'Usuario no encontrado' }, status: :not_found and return
+        end
+
+        new_password = SecureRandom.hex(8)
+        user.password = new_password
+        user.password_confirmation = new_password
+        if user.save
+          # Aquí podrías enviar el password por email o devolverlo en la respuesta (según tu política de seguridad)
+          render json: { message: 'Contraseña restablecida', new_password: new_password }, status: :ok
+        else
+          render json: { error: 'No se pudo restablecer la contraseña' }, status: :unprocessable_entity
+        end
+      end
+
+      # PATCH /api/v1/users/update_password
+      def update_password
+        user = User.find_by(id: params[:id])
+        unless user
+          render json: { error: 'Usuario no encontrado' }, status: :not_found and return
+        end
+
+        unless user.authenticate(params[:current_password])
+          render json: { error: 'Contraseña actual incorrecta' }, status: :unauthorized and return
+        end
+
+        user.password = params[:new_password]
+        user.password_confirmation = params[:new_password_confirmation]
+        if user.save
+          render json: { message: 'Contraseña actualizada correctamente' }, status: :ok
+        else
+          render json: { error: user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def set_user
