@@ -44,8 +44,8 @@ class Payment < ApplicationRecord
 
   def no_overlapping_payments
     overlapping_payments = Payment.where(user_id: user_id)
-                                   .where.not(id: id)
                                    .where("starts_at < ? AND ends_at > ?", ends_at, starts_at)
+    overlapping_payments = overlapping_payments.where.not(id: id) if id.present?
 
     if overlapping_payments.exists?
       errors.add(:base, "Payment dates cannot overlap with existing payments for the same user")
