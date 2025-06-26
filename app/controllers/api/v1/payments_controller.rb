@@ -28,6 +28,7 @@ module Api
         if @payment.save
           render json: @payment, status: :created
         else
+          Rails.logger.error(@payment.errors.full_messages.join(", "))
           render json: @payment.errors, status: :unprocessable_entity
         end
       end
