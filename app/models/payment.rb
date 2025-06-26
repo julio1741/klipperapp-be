@@ -9,7 +9,7 @@ class Payment < ApplicationRecord
   validates :amount, presence: true, numericality: { greater_than: 0 }
   validates :starts_at, :ends_at, presence: true
   validate :ends_at_after_starts_at
-  validate :no_overlapping_payments
+  #validate :no_overlapping_payments
 
   aasm column: 'aasm_state' do
     state :pending, initial: true
