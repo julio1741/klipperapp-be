@@ -15,6 +15,7 @@ class PaymentService
       finished_attendances = fetch_attendances(user.id, 'finished')
       other_attendances = fetch_attendances(user.id, ['pending', 'processing', 'postponed', 'canceled'])
       expenses = fetch_expenses(user.id)
+      payments = fetch_payments(user.id)
 
       total_earnings = finished_attendances.sum(:user_amount)
       total_expenses = expenses.sum(:amount)
@@ -27,7 +28,8 @@ class PaymentService
         earnings: total_earnings,
         expenses: expenses.as_json,
         total_expenses: total_expenses,
-        amount_to_pay: amount_to_pay
+        amount_to_pay: amount_to_pay,
+        payments: payments.as_json
       }
     end
   end
@@ -60,5 +62,10 @@ class PaymentService
     scope = scope.where(branch_id: @branch_id) if @branch_id.present?
     scope = scope.where(organization_id: @organization_id) if @organization_id.present?
     scope.where(created_at: @start_date.beginning_of_day..@end_date.end_of_day)
+  end
+
+  def fetch_payments(user_id)
+    Payment.where(user_id: user_id)
+           .where(starts_at: @start_date.beginning_of_day..@end_date.end_of_day)
   end
 end
