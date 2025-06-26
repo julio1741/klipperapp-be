@@ -23,6 +23,10 @@ class Payment < ApplicationRecord
       transitions from: :pending, to: :rejected
     end
 
+    event :resend do
+      transitions from: :rejected, to: :pending
+    end
+
     event :cancel do
       transitions from: [:pending], to: :canceled
     end

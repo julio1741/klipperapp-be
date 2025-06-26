@@ -1,7 +1,7 @@
 module Api
   module V1
     class PaymentsController < ApplicationController
-      before_action :set_payment, only: [:show, :update, :destroy, :approve, :reject, :cancel, :mark_success]
+      before_action :set_payment, only: [:show, :update, :destroy, :approve, :reject, :cancel, :mark_success, :resend]
 
       def index
         @payments = @filtered_records || Payment.all
@@ -79,6 +79,15 @@ module Api
           render json: @payment
         else
           render json: { error: "Cannot mark payment as success" }, status: :unprocessable_entity
+        end
+      end
+
+      def resend
+        if @payment.may_resend?
+          @payment.resend!
+          render json: @payment
+        else
+          render json: { error: "Cannot resend payment" }, status: :unprocessable_entity
         end
       end
 

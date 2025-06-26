@@ -63,6 +63,7 @@ Rails.application.routes.draw do
           patch :reject
           patch :cancel
           patch :mark_success
+          patch :resend
         end
       end
     end
