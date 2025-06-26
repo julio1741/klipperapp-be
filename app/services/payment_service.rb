@@ -25,6 +25,7 @@ class PaymentService
         finished_attendances: finished_attendances.as_json,
         other_attendances: other_attendances.as_json,
         earnings: total_earnings,
+        expenses: expenses.as_json,
         expenses: total_expenses,
         amount_to_pay: amount_to_pay
       }
