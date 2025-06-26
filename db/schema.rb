@@ -100,6 +100,21 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_25_012226) do
     t.string "photo_url"
   end
 
+  create_table "payments", force: :cascade do |t|
+    t.float "amount", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "branch_id", null: false
+    t.bigint "user_id", null: false
+    t.string "aasm_state", default: "pending", null: false
+    t.datetime "starts_at", precision: nil, null: false
+    t.datetime "ends_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["branch_id"], name: "index_payments_on_branch_id"
+    t.index ["organization_id"], name: "index_payments_on_organization_id"
+    t.index ["user_id"], name: "index_payments_on_user_id"
+  end
+
   create_table "profiles", force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -177,6 +192,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_25_012226) do
   add_foreign_key "expenses", "branches"
   add_foreign_key "expenses", "organizations"
   add_foreign_key "expenses", "users"
+  add_foreign_key "payments", "branches"
+  add_foreign_key "payments", "organizations"
+  add_foreign_key "payments", "users"
   add_foreign_key "profiles", "branches"
   add_foreign_key "profiles", "organizations"
   add_foreign_key "roles", "branches"

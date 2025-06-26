@@ -55,6 +55,14 @@ Rails.application.routes.draw do
       get 'show_queue', to: 'organizations#show_queue'
       post 'login', to: 'auth#login'
       get 'me', to: 'auth#me'
+      resources :payments do
+        member do
+          patch :approve
+          patch :reject
+          patch :cancel
+          patch :mark_success
+        end
+      end
     end
   end
 end
