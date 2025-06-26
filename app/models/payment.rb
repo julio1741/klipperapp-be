@@ -6,7 +6,7 @@ class Payment < ApplicationRecord
   belongs_to :branch
   belongs_to :user
 
-  validates :amount, presence: true, numericality: { greater_than: 0 }
+  validates :amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :starts_at, :ends_at, presence: true
   validate :ends_at_after_starts_at
   validate :no_overlapping_payments
