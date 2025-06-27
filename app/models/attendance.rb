@@ -52,7 +52,20 @@ class Attendance < ApplicationRecord
   end
 
   def send_message_to_frontend
-    ActionCable.server.broadcast("attendances", self.as_json)
+    data = {
+      id: self.id,
+      status: self.status,
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      attended_by: self.attended_by,
+      profile: self.profile.present? ? {
+        id: self.profile.id,
+        name: self.profile.name,
+        email: self.profile.email,
+        phone_number: self.profile.phone_number
+      } : nil
+    }
+    ActionCable.server.broadcast("attendances", data)
   end
 
   def set_start_attendance
