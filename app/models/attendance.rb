@@ -15,6 +15,7 @@ class Attendance < ApplicationRecord
 
 
   after_create :set_attended_by
+  after_create :send_message_to_frontend
   # update user list after destroy
 
   aasm column: :status do
@@ -26,28 +27,32 @@ class Attendance < ApplicationRecord
     state :canceled
 
     event :start do
-      transitions from: :pending, to: :processing, after: [:set_start_attendance]
+      transitions from: :pending, to: :processing, after: [:set_start_attendance, :send_message_to_frontend]
     end
 
     event :complete do
-      transitions from: :processing, to: :completed, after: [:set_end_attendance]
+      transitions from: :processing, to: :completed, after: [:set_end_attendance, :send_message_to_frontend]
     end
 
     event :finish do
-      transitions from: [:completed, :processing], to: :finished
+      transitions from: [:completed, :processing], to: :finished, after: [:send_message_to_frontend]
     end
 
     event :postpone do
-      transitions from: [:pending, :processing], to: :postponed
+      transitions from: [:pending, :processing], to: :postponed, after: [:send_message_to_frontend]
     end
 
     event :resume do
-      transitions from: :postponed, to: :pending
+      transitions from: :postponed, to: :pending, after: [:send_message_to_frontend]
     end
 
     event :cancel do
-      transitions from: [:pending, :processing, :completed, :postponed], to: :canceled
+      transitions from: [:pending, :processing, :completed, :postponed], to: :canceled, after: [:send_message_to_frontend]
     end
+  end
+
+  def send_message_to_frontend
+    ActionCable.server.broadcast("attendances", self.as_json)
   end
 
   def set_start_attendance
