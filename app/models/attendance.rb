@@ -15,7 +15,6 @@ class Attendance < ApplicationRecord
 
 
   after_create :set_attended_by
-  after_create :send_message_to_frontend
   # update user list after destroy
 
   aasm column: :status do
