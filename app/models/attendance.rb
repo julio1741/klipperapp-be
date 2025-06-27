@@ -58,12 +58,7 @@ class Attendance < ApplicationRecord
       organization_id: self.organization_id,
       branch_id: self.branch_id,
       attended_by: self.attended_by,
-      profile: self.profile.present? ? {
-        id: self.profile.id,
-        name: self.profile.name,
-        email: self.profile.email,
-        phone_number: self.profile.phone_number
-      } : nil
+      profile: self.profile.as_json
     }
     ActionCable.server.broadcast("attendances", data)
   end
