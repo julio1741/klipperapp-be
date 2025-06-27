@@ -52,7 +52,8 @@ class Attendance < ApplicationRecord
   end
 
   def send_message_to_frontend
-    ActionCable.server.broadcast("attendances", self.reload.as_json)
+    self.reload
+    ActionCable.server.broadcast("attendances", self.as_json)
   end
 
   def set_start_attendance
