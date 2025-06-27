@@ -94,7 +94,10 @@ module Api
         end
 
         if @user.start_attendance!
-          attendance.start! if attendance.may_start?
+          if attendance.may_start?
+            attendance.start!
+            attendance.send_message_to_frontend
+          end
           render json: { message: "El barbero comenzó a atender" }, status: :ok
         else
           render json: { error: "No se pudo cambiar el estado a 'working'" }, status: :unprocessable_entity
@@ -120,6 +123,7 @@ module Api
 
         if @user.end_attendance!
           attendance.complete! if attendance.may_complete?
+          attendance.send_message_to_frontend
           attendance.set_profile_last_attended_date(attendance.profile_id)
           render json: { message: "El barbero terminó de atender" }, status: :ok
         else
@@ -141,6 +145,7 @@ module Api
 
         attendance.assign_attributes(finish_attendance_params)
         attendance.finish!
+        attendance.send_message_to_frontend
         render json: { message: "Asistencia finalizada correctamente" }, status: :ok
       end
 
@@ -155,6 +160,7 @@ module Api
 
         if attendance.may_postpone?
           attendance.postpone!
+          attendance.send_message_to_frontend
           render json: { message: "Asistencia pospuesta correctamente" }, status: :ok
         else
           render json: { error: "No se puede posponer esta asistencia" }, status: :unprocessable_entity
@@ -171,6 +177,7 @@ module Api
         return render json: { error: "Asistencia no encontrada" }, status: :not_found unless attendance
         if attendance.may_resume?
           attendance.resume!
+          attendance.send_message_to_frontend
           render json: { message: "Asistencia reanudada correctamente" }, status: :ok
         else
           render json: { error: "No se puede reanudar esta asistencia" }, status: :unprocessable_entity
@@ -189,6 +196,7 @@ module Api
         if attendance.may_cancel?
           attendance.comments = comments if comments
           attendance.cancel!
+          attendance.send_message_to_frontend
           render json: { message: "Asistencia cancelada correctamente" }, status: :ok
         else
           render json: { error: "No se puede cancelar esta asistencia" }, status: :unprocessable_entity

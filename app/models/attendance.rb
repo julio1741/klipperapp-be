@@ -27,27 +27,27 @@ class Attendance < ApplicationRecord
     state :canceled
 
     event :start do
-      transitions from: :pending, to: :processing, after: [:set_start_attendance, :send_message_to_frontend]
+      transitions from: :pending, to: :processing, after: [:set_start_attendance]
     end
 
     event :complete do
-      transitions from: :processing, to: :completed, after: [:set_end_attendance, :send_message_to_frontend]
+      transitions from: :processing, to: :completed, after: [:set_end_attendance]
     end
 
     event :finish do
-      transitions from: [:completed, :processing], to: :finished, after: [:send_message_to_frontend]
+      transitions from: [:completed, :processing], to: :finished
     end
 
     event :postpone do
-      transitions from: [:pending, :processing], to: :postponed, after: [:send_message_to_frontend]
+      transitions from: [:pending, :processing], to: :postponed
     end
 
     event :resume do
-      transitions from: :postponed, to: :pending, after: [:send_message_to_frontend]
+      transitions from: :postponed, to: :pending
     end
 
     event :cancel do
-      transitions from: [:pending, :processing, :completed, :postponed], to: :canceled, after: [:send_message_to_frontend]
+      transitions from: [:pending, :processing, :completed, :postponed], to: :canceled
     end
   end
 
