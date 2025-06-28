@@ -60,7 +60,7 @@ class Attendance < ApplicationRecord
       attended_by: self.attended_by,
       profile: self.profile.as_json
     }
-    broadcast_pusher('attendance_channel', 'attendance', { attendance: data })
+    broadcast_pusher('attendance_channel', 'attendance', data)
   end
 
   def set_start_attendance
