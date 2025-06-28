@@ -60,7 +60,7 @@ class Attendance < ApplicationRecord
       attended_by: self.attended_by,
       profile: self.profile.as_json
     }
-    broadcast_pusher('attendance_channel', 'attendance', { message: 'Actualizar attendances', data: data })
+    broadcast_pusher('attendance_channel', 'attendance', { attendance: data })
   end
 
   def set_start_attendance
