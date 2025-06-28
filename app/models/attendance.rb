@@ -1,6 +1,7 @@
 class Attendance < ApplicationRecord
   include AASM
   include Filterable
+  include PusherBroadcastable
 
   belongs_to :profile
   belongs_to :organization
@@ -51,6 +52,15 @@ class Attendance < ApplicationRecord
   end
 
   def send_message_to_frontend
+    data = {
+      id: self.id,
+      status: self.status,
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      attended_by: self.attended_by,
+      profile: self.profile.as_json
+    }
+    broadcast_pusher('attendance_channel', 'attendance', { message: 'Actualizar attendances', data: data })
   end
 
   def set_start_attendance
