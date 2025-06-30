@@ -44,6 +44,7 @@ Rails.application.routes.draw do
           get 'calculate_payment', to: 'users#calculate_payment'
           post 'reset_password', to: 'users#reset_password'
           patch 'update_password', to: 'users#update_password'
+          post 'verify_email', to: 'users#verify_email'
         end
       end
 

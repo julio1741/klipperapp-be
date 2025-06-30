@@ -16,6 +16,7 @@ module Api
         @user = User.new(user_params)
         if @user.save
           set_branches
+          UserMailer.email_verification(@user).deliver_later
           render json: @user, status: :created
         else
           render json: @user.errors, status: :unprocessable_entity
@@ -258,6 +259,25 @@ module Api
           render json: { message: 'Contraseña actualizada correctamente' }, status: :ok
         else
           render json: { error: user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      # POST /api/v1/users/verify_email
+      def verify_email
+        user = User.find_by(email: params[:email])
+        unless user
+          render json: { error: 'Usuario no encontrado' }, status: :not_found and return
+        end
+
+        if user.email_verified
+          render json: { message: 'El correo ya está verificado' }, status: :ok and return
+        end
+
+        if user.email_verification_code == params[:code]
+          user.update(email_verified: true, email_verification_code: nil)
+          render json: { message: 'Correo verificado correctamente' }, status: :ok
+        else
+          render json: { error: 'Código de verificación incorrecto' }, status: :unprocessable_entity
         end
       end
 

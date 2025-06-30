@@ -21,6 +21,8 @@ class User < ApplicationRecord
 
   after_update :set_today_users_list, if: -> { saved_change_to_start_working_at? }
 
+  before_create :set_email_verification
+
   aasm column: 'work_state' do
     state :stand_by, initial: true
     state :working
@@ -119,5 +121,10 @@ class User < ApplicationRecord
     def set_end_working_at_nil
     self.start_working_at = nil
     save
+  end
+
+  def set_email_verification
+    self.email_verified = false
+    self.email_verification_code = SecureRandom.hex(3).upcase # 6-char code
   end
 end
