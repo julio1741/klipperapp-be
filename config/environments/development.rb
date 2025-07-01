@@ -75,4 +75,18 @@ Rails.application.configure do
   #   'http://localhost:3000',
   #   ...
   # ]
+
+  # === Configuración de correo para desarrollo ===
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address:              'smtp.sendgrid.net',
+    port:                 587,
+    domain:               'sendgrid.net',
+    user_name:            ENV['SMTP_USERNAME'],
+    password:             ENV['SMTP_PASSWORD'],
+    authentication:       'plain',
+    enable_starttls_auto: true
+  }
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  config.action_mailer.raise_delivery_errors = true
 end
