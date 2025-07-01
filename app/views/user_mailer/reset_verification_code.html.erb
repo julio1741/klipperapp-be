@@ -1,5 +1,42 @@
-<h1>Solicitud de verificación de correo</h1>
-<p>Hola <%= @user.name %>,</p>
-<p>Recibimos una solicitud para verificar tu correo electrónico. Tu nuevo código de verificación es: <strong><%= @user.email_verification_code %></strong></p>
-<p>Por favor, ingresa este código en la aplicación para continuar con el proceso.</p>
-<p style="color: red;">Si no solicitaste este código, ignora este correo. Nadie podrá acceder a tu cuenta sin este código.</p>
+<style>
+  .mail-container {
+    max-width: 420px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #eee;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 32px 24px;
+    color: #222;
+  }
+  .mail-title {
+    color: #2a7ae2;
+    font-size: 1.5em;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .mail-code {
+    display: inline-block;
+    background: #f3f7fa;
+    color: #2a7ae2;
+    font-size: 1.3em;
+    font-weight: bold;
+    padding: 8px 18px;
+    border-radius: 6px;
+    margin: 12px 0;
+    letter-spacing: 2px;
+  }
+  .mail-warning {
+    color: #d32f2f;
+    font-size: 0.98em;
+    margin-top: 18px;
+  }
+</style>
+<div class="mail-container">
+  <div class="mail-title">Solicitud de verificación de correo</div>
+  <p>Hola <%= @user.name %>,</p>
+  <p>Recibimos una solicitud para verificar tu correo electrónico. Tu nuevo código de verificación es:</p>
+  <div class="mail-code"><%= @user.email_verification_code %></div>
+  <p>Por favor, ingresa este código en la aplicación para continuar con el proceso.</p>
+  <div class="mail-warning">Si no solicitaste este código, ignora este correo. Nadie podrá acceder a tu cuenta sin este código.</div>
+</div>
