@@ -1,0 +1,5 @@
+<h1>Solicitud de verificación de correo</h1>
+<p>Hola <%= @user.name %>,</p>
+<p>Recibimos una solicitud para verificar tu correo electrónico. Tu nuevo código de verificación es: <strong><%= @user.email_verification_code %></strong></p>
+<p>Por favor, ingresa este código en la aplicación para continuar con el proceso.</p>
+<p style="color: red;">Si no solicitaste este código, ignora este correo. Nadie podrá acceder a tu cuenta sin este código.</p>

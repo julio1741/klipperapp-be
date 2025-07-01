@@ -231,14 +231,14 @@ module Api
           render json: { error: 'Usuario no encontrado' }, status: :not_found and return
         end
 
-        new_password = SecureRandom.hex(8)
-        user.password = new_password
-        user.password_confirmation = new_password
+        # Generar nuevo código de verificación y marcar como no verificado
+        user.email_verification_code = SecureRandom.hex(3).upcase
+        user.email_verified = false
         if user.save
-          # Aquí podrías enviar el password por email o devolverlo en la respuesta (según tu política de seguridad)
-          render json: { message: 'Contraseña restablecida', new_password: new_password }, status: :ok
+          UserMailer.reset_verification_code(user).deliver_later
+          render json: { message: 'Se envió un nuevo código de verificación al correo.' }, status: :ok
         else
-          render json: { error: 'No se pudo restablecer la contraseña' }, status: :unprocessable_entity
+          render json: { error: 'No se pudo generar el código de verificación' }, status: :unprocessable_entity
         end
       end
 
@@ -274,8 +274,16 @@ module Api
         end
 
         if user.email_verification_code == params[:code]
-          user.update(email_verified: true, email_verification_code: nil)
-          render json: { message: 'Correo verificado correctamente' }, status: :ok
+          update_attrs = { email_verified: true, email_verification_code: nil }
+          if params[:password].present?
+            update_attrs[:password] = params[:password]
+            update_attrs[:password_confirmation] = params[:password_confirmation] || params[:password]
+          end
+          if user.update(update_attrs)
+            render json: { message: 'Correo verificado correctamente' }, status: :ok
+          else
+            render json: { error: user.errors.full_messages }, status: :unprocessable_entity
+          end
         else
           render json: { error: 'Código de verificación incorrecto' }, status: :unprocessable_entity
         end
