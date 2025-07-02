@@ -21,6 +21,7 @@ Rails.application.routes.draw do
           get 'today', to: 'attendances#today'
           get 'history', to: 'attendances#history'
           get 'statistics', to: 'attendances#statistics'
+          get 'summary', to: 'attendances#summary'
         end
       end
       resources :branches

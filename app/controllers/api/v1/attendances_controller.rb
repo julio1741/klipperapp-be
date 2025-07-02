@@ -192,6 +192,27 @@ module Api
         render json: stats, status: :ok
       end
 
+      # GET /api/v1/attendances/summary
+      def summary
+        start_day = params[:start_day]
+        end_day = params[:end_day]
+        organization_id = params[:organization_id]
+        branch_id = params[:branch_id]
+        user_id = params[:user_id]
+        status = params[:status]
+
+        summary = AttendanceSummary.new(
+          start_day: start_day,
+          end_day: end_day,
+          organization_id: organization_id,
+          branch_id: branch_id,
+          user_id: user_id,
+          status: status
+        ).perform
+
+        render json: summary, status: :ok
+      end
+
       private
 
       def set_attendance
