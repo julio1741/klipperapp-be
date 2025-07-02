@@ -235,10 +235,11 @@ module Api
         user.email_verification_code = SecureRandom.hex(3).upcase
         user.email_verified = false
         if user.save
+          Rails.logger.info "Nuevo código de verificación generado: #{user.email_verification_code}"
           UserMailer.reset_verification_code(user).deliver_later
           render json: { message: 'Se envió un nuevo código de verificación al correo.' }, status: :ok
         else
-          render json: { error: 'No se pudo generar el código de verificación' }, status: :unprocessable_entity
+          render json: { error: 'No se pudo generar el código de verificación', details: user.errors.full_messages }, status: :unprocessable_entity
         end
       end
 
