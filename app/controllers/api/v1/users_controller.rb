@@ -59,7 +59,14 @@ module Api
 
         @users = User.users_working_today(organization_id, branch_id, role_id)
 
-        render json: @users.as_json(include: { role: {} }), status: :ok
+        users_with_queue_count = @users.map do |user|
+          queue_count = Attendance.where(attended_by: user.id, status: [:processing, :pending])
+            .where("created_at >= ? AND created_at <= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day, Time.now.in_time_zone('America/Santiago').end_of_day)
+            .count
+          user.as_json(include: { role: {} }).merge(attendances_queue_count: queue_count)
+        end
+
+        render json: users_with_queue_count, status: :ok
       end
 
       def start_day
