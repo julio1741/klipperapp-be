@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_30_231318) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_03_163538) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -35,6 +35,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_30_231318) do
     t.string "payment_method"
     t.integer "parent_attendance_id"
     t.text "comments"
+    t.integer "tip_amount"
     t.index ["branch_id"], name: "index_attendances_on_branch_id"
     t.index ["organization_id"], name: "index_attendances_on_organization_id"
     t.index ["parent_attendance_id"], name: "index_attendances_on_parent_attendance_id"
