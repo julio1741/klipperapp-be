@@ -60,10 +60,18 @@ module Api
         @users = User.users_working_today(organization_id, branch_id, role_id)
 
         users_with_queue_count = @users.map do |user|
-          queue_count = Attendance.where(attended_by: user.id, status: [:processing, :pending])
+          attendances = Attendance.where(attended_by: user.id, status: [:processing, :pending])
             .where("created_at >= ? AND created_at <= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day, Time.now.in_time_zone('America/Santiago').end_of_day)
-            .count
-          user.as_json(include: { role: {} }).merge(attendances_queue_count: queue_count)
+
+          queue_count = attendances.count
+
+          # Suma de la duración de todos los servicios de todas las attendances en la cola
+          estimated_waiting_time = attendances.joins(:services).sum('services.duration')
+
+          user.as_json(include: { role: {} }).merge(
+            attendances_queue_count: queue_count,
+            estimated_waiting_time: estimated_waiting_time
+          )
         end
 
         render json: users_with_queue_count, status: :ok
