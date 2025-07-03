@@ -65,7 +65,7 @@ module Api
 
       # GET /api/v1/attendances/:id
       def show
-        render json: @attendance, serializer: AttendanceSerializer
+        render json: @attendance, serializer: AttendanceSerializer, include: ['attended_by_user', 'profile', 'services', 'child_attendances', 'child_attendances.attended_by_user', 'child_attendances.profile', 'child_attendances.services']
       end
 
       # POST /api/v1/attendances
