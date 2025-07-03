@@ -65,21 +65,7 @@ module Api
 
       # GET /api/v1/attendances/:id
       def show
-        @attendance.as_json(
-          include: {
-            attended_by_user: { except: [:password_digest, :encrypted_password, :password] },
-            profile: {},
-            services: [],
-            child_attendances: {
-              include: {
-                attended_by_user: { except: [:password_digest, :encrypted_password, :password] },
-                  profile: {},
-                  services: [],
-                  child_attendances: []
-              }
-            }
-          }
-        )
+        render json: @attendance, serializer: AttendanceSerializer
       end
 
       # POST /api/v1/attendances
