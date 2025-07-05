@@ -129,4 +129,19 @@ class Attendance < ApplicationRecord
     broadcast_pusher('attendance_channel', 'attendance', {})
   end
 
+  before_create :generate_nid
+
+  private
+
+  def generate_nid
+    today = self.date || Date.current
+    last_nid = Attendance.where(date: today).order(:nid).pluck(:nid).last
+    if last_nid.present?
+      last_number = last_nid[1..-1].to_i
+      next_number = last_number + 1
+    else
+      next_number = 1
+    end
+    self.nid = "A#{next_number.to_s.rjust(3, '0')}"
+  end
 end

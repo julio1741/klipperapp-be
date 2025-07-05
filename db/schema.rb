@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_05_035016) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_05_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -36,7 +36,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_05_035016) do
     t.integer "parent_attendance_id"
     t.text "comments"
     t.integer "tip_amount"
+    t.string "nid"
     t.index ["branch_id"], name: "index_attendances_on_branch_id"
+    t.index ["date", "nid"], name: "index_attendances_on_date_and_nid", unique: true
     t.index ["organization_id"], name: "index_attendances_on_organization_id"
     t.index ["parent_attendance_id"], name: "index_attendances_on_parent_attendance_id"
     t.index ["profile_id"], name: "index_attendances_on_profile_id"
