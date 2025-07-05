@@ -43,7 +43,7 @@ class Attendance < ApplicationRecord
     end
 
     event :resume do
-      transitions from: :postponed, to: :pending
+      transitions from: :postponed, to: :processing
     end
 
     event :cancel do
