@@ -138,8 +138,8 @@ module Api
         end
 
         begin
-          @user.end_attendance! if @user.may_end_attendance?
           attendance.complete! if attendance.may_complete?
+          @user.end_attendance! if @user.may_end_attendance?
           attendance.send_message_to_frontend
           attendance.set_profile_last_attended_date(attendance.profile_id)
           render json: { message: "El barbero terminó de atender" }, status: :ok
