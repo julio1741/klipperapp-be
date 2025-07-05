@@ -60,7 +60,7 @@ module Api
         @users = User.users_working_today(organization_id, branch_id, role_id)
 
         users_with_queue_count = @users.map do |user|
-          attendances = Attendance.where(attended_by: user.id, status: [:processing, :pending])
+          attendances = Attendance.where(attended_by: user.id, status: [:processing, :pending, :postponed])
             .where("attendances.created_at >= ? AND attendances.created_at <= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day, Time.now.in_time_zone('America/Santiago').end_of_day)
 
           queue_count = attendances.count
