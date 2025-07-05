@@ -45,7 +45,7 @@ class Attendance < ApplicationRecord
     end
 
     event :resume do
-      transitions from: :postponed, to: :processing
+      transitions from: :postponed, to: :processing, guard: :user_has_no_other_processing_attendance?
     end
 
     event :cancel do
@@ -155,5 +155,13 @@ class Attendance < ApplicationRecord
     if exists
       errors.add(:base, "Ya existe una asistencia para este perfil en estado pendiente, en proceso o pospuesta hoy.")
     end
+  end
+
+  def user_has_no_other_processing_attendance?
+    return true unless attended_by_user # Si no hay usuario asignado, permitir
+    Attendance.where(attended_by: attended_by_user.id, status: :processing)
+      .where.not(id: id)
+      .where("created_at >= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day)
+      .none?
   end
 end
