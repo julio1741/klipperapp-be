@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_05_180000) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_05_180001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -41,6 +41,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_05_180000) do
     t.index ["date", "nid"], name: "index_attendances_on_date_and_nid", unique: true
     t.index ["organization_id"], name: "index_attendances_on_organization_id"
     t.index ["parent_attendance_id"], name: "index_attendances_on_parent_attendance_id"
+    t.index ["profile_id", "status"], name: "unique_active_attendance_per_profile", unique: true, where: "((status)::text = ANY ((ARRAY['pending'::character varying, 'processing'::character varying, 'postponed'::character varying])::text[]))"
     t.index ["profile_id"], name: "index_attendances_on_profile_id"
   end
 
