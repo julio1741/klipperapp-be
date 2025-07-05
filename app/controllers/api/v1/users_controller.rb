@@ -137,12 +137,14 @@ module Api
           return
         end
 
-        if @user.end_attendance!
+        begin
+          @user.end_attendance! if @user.may_end_attendance?
           attendance.complete! if attendance.may_complete?
           attendance.send_message_to_frontend
           attendance.set_profile_last_attended_date(attendance.profile_id)
           render json: { message: "El barbero terminó de atender" }, status: :ok
-        else
+        rescue AASM::InvalidTransition => e
+          Rails.logger.error "Error al finalizar asistencia: #{e.message}"
           render json: { error: "No se pudo cambiar el estado a 'available'" }, status: :unprocessable_entity
         end
       end

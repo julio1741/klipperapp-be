@@ -46,7 +46,7 @@ class User < ApplicationRecord
     end
 
     event :end_attendance do
-      transitions from: :working, to: :available
+      transitions from: :working, to: :available, guard: :no_active_attendances_today?
     end
 
     event :set_stand_by do
@@ -128,5 +128,10 @@ class User < ApplicationRecord
   def set_email_verification
     self.email_verified = false
     self.email_verification_code = SecureRandom.hex(3).upcase # 6-char code
+  end
+
+  def no_active_attendances_today?
+    today = Time.now.in_time_zone('America/Santiago').beginning_of_day
+    !attendances.where(status: [:pending, :processing, :postponed]).where("created_at >= ?", today).exists?
   end
 end
