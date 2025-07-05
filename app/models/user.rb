@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   include AASM
   include Filterable
+  include PusherBroadcastable
   has_secure_password
 
   belongs_to :role
@@ -114,6 +115,7 @@ class User < ApplicationRecord
 
   def set_start_working_at
     self.start_working_at = Time.now.in_time_zone('America/Santiago')
+    broadcast_pusher('attendance_channel', 'attendance', {})
     add_user_to_queue
     save
   end

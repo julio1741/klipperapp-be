@@ -126,6 +126,7 @@ class Attendance < ApplicationRecord
       .find_each do |attendance|
         attendance.cancel!
       end
+    broadcast_pusher('attendance_channel', 'attendance', {})
   end
 
 end
