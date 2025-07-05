@@ -130,6 +130,7 @@ class Attendance < ApplicationRecord
   end
 
   before_create :generate_nid
+  validate :unique_profile_per_day_pending_processing, on: :create
 
   private
 
@@ -143,5 +144,13 @@ class Attendance < ApplicationRecord
       next_number = 1
     end
     self.nid = "A#{next_number.to_s.rjust(3, '0')}"
+  end
+
+  def unique_profile_per_day_pending_processing
+    today = self.date || Date.current
+    exists = Attendance.where(date: today, profile_id: profile_id, status: [:pending, :processing]).exists?
+    if exists
+      errors.add(:base, "Ya existe una asistencia para este perfil en estado pendiente o en proceso hoy.")
+    end
   end
 end
