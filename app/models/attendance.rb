@@ -14,8 +14,10 @@ class Attendance < ApplicationRecord
   belongs_to :parent_attendance, class_name: "Attendance", optional: true
   has_many :child_attendances, class_name: "Attendance", foreign_key: :parent_attendance_id, dependent: :nullify
 
-
+  before_create :generate_nid
   after_create :set_attended_by
+  validate :unique_profile_per_day_pending_processing, on: :create
+
   # update user list after destroy
 
   aasm column: :status do
@@ -129,9 +131,6 @@ class Attendance < ApplicationRecord
     broadcast_pusher('attendance_channel', 'attendance', {})
   end
 
-  before_create :generate_nid
-  validate :unique_profile_per_day_pending_processing, on: :create
-
   private
 
   def generate_nid
@@ -147,10 +146,14 @@ class Attendance < ApplicationRecord
   end
 
   def unique_profile_per_day_pending_processing
-    today = self.date || Date.current
-    exists = Attendance.where(date: today, profile_id: profile_id, status: [:pending, :processing]).exists?
+    today = Time.now.in_time_zone('America/Santiago').beginning_of_day
+    exists = Attendance.where(profile_id: profile_id)
+      .where(status: [:pending, :processing, :postponed])
+      .where("created_at >= ?", today)
+      .where.not(id: id) # Por si acaso en update
+      .exists?
     if exists
-      errors.add(:base, "Ya existe una asistencia para este perfil en estado pendiente o en proceso hoy.")
+      errors.add(:base, "Ya existe una asistencia para este perfil en estado pendiente, en proceso o pospuesta hoy.")
     end
   end
 end
