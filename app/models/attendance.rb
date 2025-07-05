@@ -29,7 +29,7 @@ class Attendance < ApplicationRecord
     state :canceled
 
     event :start do
-      transitions from: :pending, to: :processing, after: [:set_start_attendance]
+      transitions from: :pending, to: :processing, after: [:set_start_attendance], guard: :user_has_no_other_processing_attendance?
     end
 
     event :complete do
