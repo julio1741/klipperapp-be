@@ -134,8 +134,8 @@ class Attendance < ApplicationRecord
   private
 
   def generate_nid
-    today = self.date || Date.current
-    last_nid = Attendance.where(date: today).order(:nid).pluck(:nid).last
+    today = Time.now.in_time_zone('America/Santiago').to_date
+    last_nid = Attendance.where("DATE(created_at) = ?", today).order(:nid).pluck(:nid).last
     if last_nid.present?
       last_number = last_nid[1..-1].to_i
       next_number = last_number + 1
