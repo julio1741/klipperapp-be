@@ -84,8 +84,7 @@ class Attendance < ApplicationRecord
       user = assign_service.next_available
       self.attended_by = user.id if user
     end
-    #self.attended_by_user.start_attendance!
-    #assign_service.rotate(self.attended_by_user)# (ya el start_attendnace lo hace)
+    assign_service.rotate(self.attended_by_user)
     save
   end
 

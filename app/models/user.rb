@@ -42,7 +42,7 @@ class User < ApplicationRecord
     end
 
     event :start_attendance do
-      transitions from: [:available, :working], to: :working, after: [:rotate_user_from_queue]
+      transitions from: [:available, :working], to: :working#, after: [:rotate_user_from_queue]
     end
 
     event :end_attendance do
