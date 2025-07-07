@@ -5,10 +5,10 @@
 
 :schedule:
   cancel_old_attendances:
-    cron: "0 8 * * *" # Ejecutar todos los días a las 4:00 am Chile (-4 UTC)
+    cron: "0 4 * * *" # Ejecutar todos los días a las 4:00 am Chile (-4 UTC)
     class: "CancelOldAttendancesJob"
     timezone: "America/Santiago"
   set_users_stand_by:
-    cron: "0 8 * * *" # Ejecutar todos los días a las 4:00 am Chile (-4 UTC)
+    cron: "0 4 * * *" # Ejecutar todos los días a las 4:00 am Chile (-4 UTC)
     class: "SetUsersStandByJob"
     timezone: "America/Santiago"
