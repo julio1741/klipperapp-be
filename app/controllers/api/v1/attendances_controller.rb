@@ -159,7 +159,8 @@ module Api
                 organization_id: profile.organization_id,
                 branch_id: profile.branch_id,
                 attendance_id: att.id,
-                status: att.status
+                status: att.status,
+                clickeable: att.clickeable?
               }
             end
           }

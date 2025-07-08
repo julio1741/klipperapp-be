@@ -138,6 +138,30 @@ class Attendance < ApplicationRecord
     broadcast_pusher('attendance_channel', 'attendance', {})
   end
 
+  # Determina si una attendance es clickeable según la lógica de negocio
+  def clickeable?
+    # Si es postponed, es clickeable salvo que el usuario tenga una en processing
+    if postponed?
+      return !Attendance.where(attended_by: attended_by, status: :processing)
+        .where("created_at >= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day)
+        .exists?
+    end
+
+    # Si es pending, solo el primero (más antiguo) es clickeable y solo si no hay processing
+    if pending?
+      return false if Attendance.where(attended_by: attended_by, status: :processing)
+        .where("created_at >= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day)
+        .exists?
+      first_pending = Attendance.where(attended_by: attended_by, status: :pending)
+        .where("created_at >= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day)
+        .order(:created_at).first
+      return self.id == first_pending&.id
+    end
+
+    # Otros estados no son clickeables
+    false
+  end
+
   private
 
   def generate_nid
