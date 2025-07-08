@@ -28,6 +28,7 @@ class User < ApplicationRecord
     state :stand_by, initial: true
     state :working
     state :available
+    state :not_available
 
     event :start_shift do
       transitions from: [:stand_by, :available], to: :available, after: :set_start_working_at
