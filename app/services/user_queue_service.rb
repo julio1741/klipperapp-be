@@ -16,7 +16,7 @@ class UserQueueService
     Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
   end
 
-    def add_user_to_order_queue(user)
+  def add_user_to_order_queue(user)
     user_ids = Rails.cache.read(@order_cache_key) || []
     return if user_ids.include?(user.id)
     user_ids << user.id
