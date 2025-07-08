@@ -322,7 +322,7 @@ module Api
       def finish_attendance_params
         params.require(:attendance).permit(
           :discount, :extra_discount,
-          :user_amount, :organization_amount, :total_amount, :trx_number,
+          :user_amount, :organization_amount, :total_amount, :trx_number, :tip_amount,
           :payment_method, service_ids: [], child_attendance_ids: []
         )
       end
