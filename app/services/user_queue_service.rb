@@ -6,6 +6,7 @@ class UserQueueService
     @role = Role.find_by(name: @role_name)
     @today = Time.current.in_time_zone('America/Santiago').to_date
     @cache_key = "barber_queue:org:#{@organization_id}:branch:#{@branch_id}:#{@today}"
+    @order_cache_key = "order_barber_queue:org:#{@organization_id}:branch:#{@branch_id}:#{@today}"
   end
 
   def add_user_to_queue(user)
@@ -29,7 +30,7 @@ class UserQueueService
 
     # Devuelve el próximo barbero disponible (menos carga, más arriba en la cola)
   def next_available
-    users = queue
+    users = Rails.cache.read(@order_cache_key)
 
     return nil if users.empty?
 
@@ -50,6 +51,14 @@ class UserQueueService
     Rails.cache.read(@cache_key)&.index(user_id) || 9999
   end
 
+  # sacar user de la cola
+  def remove(user)
+    user_ids = Rails.cache.read(@cache_key) || []
+    return unless user_ids.include?(user.id)
+    user_ids.delete(user.id)
+    Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
+  end
+
     # Mueve al user que acaba de atender al final de la cola
   def rotate(user)
     user_ids = Rails.cache.read(@cache_key) || []
@@ -68,6 +77,7 @@ class UserQueueService
     puts "Building initial queue for #{@organization_id} - #{@branch_id} on #{@today}: #{user_ids.inspect}"
     puts "Cache key: #{@cache_key}"
     Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
+    Rails.cache.write(@order_cache_key, user_ids, expires_in: 12.hours)
     user_ids
   end
 

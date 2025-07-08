@@ -35,19 +35,19 @@ class User < ApplicationRecord
     end
 
     event :not_available do
-      transitions from: [:available], to: :not_available, after: :send_message_to_frontend
+      transitions from: [:available], to: :not_available, guard: :no_active_attendances_today?, after: [:remove_user_from_queue, :send_message_to_frontend]
     end
 
     event :available do
-      transitions from: [:stand_by, :not_available], to: :available, after: :send_message_to_frontend
+      transitions from: [:stand_by, :not_available], to: :available, after: [:add_user_to_queue, :send_message_to_frontend]
     end
 
     event :start_attendance do
-      transitions from: [:available, :working], to: :working#, after: [:rotate_user_from_queue]
+      transitions from: [:available, :working], to: :working, after: :remove_user_from_queue
     end
 
     event :end_attendance do
-      transitions from: :working, to: :available, guard: :no_active_attendances_today?
+      transitions from: :working, to: :available, guard: :no_active_attendances_today?, after: :add_user_to_queue
     end
 
     event :set_stand_by do
@@ -57,6 +57,22 @@ class User < ApplicationRecord
     event :end_shift do
       transitions from: [:available, :working], to: :stand_by, after: :set_end_working_at_nil
     end
+  end
+
+  def add_user_to_queue
+    assign_service = UserQueueService.new(
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      role_name: "agent")
+    assign_service.add_user_to_queue(self)
+  end
+
+  def remove_user_from_queue
+    assign_service = UserQueueService.new(
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      role_name: "agent")
+    assign_service.remove(self)
   end
 
   def send_message_to_frontend
@@ -70,14 +86,6 @@ class User < ApplicationRecord
       branch_id: self.branch_id,
       role_name: "agent")
     assign_service.add_user_to_queue(self)
-  end
-
-  def rotate_user_from_queue
-    assign_service = UserQueueService.new(
-      organization_id: self.organization_id,
-      branch_id: self.branch_id,
-      role_name: "agent")
-    assign_service.rotate(self)
   end
 
   def working_today?
