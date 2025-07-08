@@ -129,6 +129,7 @@ class User < ApplicationRecord
 
   def set_start_working_at
     self.start_working_at = Time.now.in_time_zone('America/Santiago')
+    add_user_to_queue
     add_user_to_order_queue
     broadcast_pusher('attendance_channel', 'attendance', {})
     save
