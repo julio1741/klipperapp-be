@@ -31,7 +31,7 @@ class User < ApplicationRecord
     state :not_available
 
     event :start_shift do
-      transitions from: [:stand_by, :available], to: :available, after: [:set_start_working_at, :add_user_to_order_queue]
+      transitions from: [:stand_by, :available], to: :available, after: [:set_start_working_at]
     end
 
     event :not_available do
@@ -129,7 +129,7 @@ class User < ApplicationRecord
 
   def set_start_working_at
     self.start_working_at = Time.now.in_time_zone('America/Santiago')
-    add_user_to_order_queue(self)
+    add_user_to_order_queue
     broadcast_pusher('attendance_channel', 'attendance', {})
     save
   end
