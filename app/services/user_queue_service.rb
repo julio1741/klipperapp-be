@@ -89,30 +89,4 @@ class UserQueueService
     user_ids
   end
 
-  # Guarda la última posición del usuario en la cola antes de removerlo
-  def save_last_queue_position(user)
-    user_ids = Rails.cache.read(@cache_key) || []
-    pos = user_ids.index(user.id)
-    if pos
-      Rails.cache.write(last_position_key(user), pos, expires_in: 12.hours)
-    end
-  end
-
-  # Restaura al usuario en su posición original o al principio si ya pasó su turno
-  def restore_queue_position(user)
-    user_ids = Rails.cache.read(@cache_key) || []
-    pos = Rails.cache.read(last_position_key(user))
-    if pos && pos <= user_ids.length
-      user_ids.insert(pos, user.id)
-    else
-      user_ids.unshift(user.id)
-    end
-    user_ids.uniq!
-    Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
-    Rails.cache.delete(last_position_key(user))
-  end
-
-  def last_position_key(user)
-    "last_queue_position:user:#{user.id}:org:#{@organization_id}:branch:#{@branch_id}:#{@today}"
-  end
 end

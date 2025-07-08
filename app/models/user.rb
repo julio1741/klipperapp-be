@@ -59,23 +59,28 @@ class User < ApplicationRecord
     end
   end
 
-  # Guarda la posición antes de salir de la cola
-  def remove_user_from_queue
-    assign_service = UserQueueService.new(
-      organization_id: self.organization_id,
-      branch_id: self.branch_id,
-      role_name: "agent")
-    assign_service.save_last_queue_position(self)
-    assign_service.remove(self)
-  end
-
-  # Al volver a available, intenta restaurar la posición original
   def add_user_to_queue
     assign_service = UserQueueService.new(
       organization_id: self.organization_id,
       branch_id: self.branch_id,
       role_name: "agent")
-    assign_service.restore_queue_position(self)
+    assign_service.add_user_to_queue(self)
+  end
+
+  def add_user_to_order_queue
+    assign_service = UserQueueService.new(
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      role_name: "agent")
+    assign_service.add_user_to_order_queue(self)
+  end
+
+  def remove_user_from_queue
+    assign_service = UserQueueService.new(
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      role_name: "agent")
+    assign_service.remove(self)
   end
 
   def send_message_to_frontend
