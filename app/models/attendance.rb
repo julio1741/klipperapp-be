@@ -140,6 +140,9 @@ class Attendance < ApplicationRecord
 
   # Determina si una attendance es clickeable según la lógica de negocio
   def clickeable?
+    # Si es processing, siempre es clickeable
+    return true if processing?
+
     # Si es postponed, es clickeable salvo que el usuario tenga una en processing
     if postponed?
       return !Attendance.where(attended_by: attended_by, status: :processing)
