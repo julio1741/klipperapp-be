@@ -47,6 +47,9 @@ Rails.application.routes.draw do
           patch 'update_password', to: 'users#update_password'
           post 'verify_email', to: 'users#verify_email'
         end
+        member do
+          patch 'not_available', to: 'users#not_available'
+        end
       end
 
       resources :organizations do

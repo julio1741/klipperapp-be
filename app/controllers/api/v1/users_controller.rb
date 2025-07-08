@@ -307,6 +307,17 @@ module Api
         end
       end
 
+      # PATCH /api/v1/users/:id/not_available
+      def not_available
+        @user = User.find(params[:id])
+        if @user.may_not_available?
+          @user.not_available!
+          render json: { message: 'Usuario puesto como no disponible' }, status: :ok
+        else
+          render json: { error: 'No se puede poner como no disponible en este estado' }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def set_user
