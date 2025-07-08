@@ -31,7 +31,7 @@ class User < ApplicationRecord
     state :not_available
 
     event :start_shift do
-      transitions from: [:stand_by, :available], to: :available, after: :set_start_working_at
+      transitions from: [:stand_by, :available], to: :available, after: [:set_start_working_at, :add_user_to_order_queue]
     end
 
     event :not_available do
@@ -67,6 +67,14 @@ class User < ApplicationRecord
     assign_service.add_user_to_queue(self)
   end
 
+  def add_user_to_order_queue
+    assign_service = UserQueueService.new(
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      role_name: "agent")
+    assign_service.add_user_to_order_queue(self)
+  end
+
   def remove_user_from_queue
     assign_service = UserQueueService.new(
       organization_id: self.organization_id,
@@ -78,14 +86,6 @@ class User < ApplicationRecord
   def send_message_to_frontend
     data = {}
     broadcast_pusher('attendance_channel', 'attendance', data)
-  end
-
-  def add_user_to_queue
-    assign_service = UserQueueService.new(
-      organization_id: self.organization_id,
-      branch_id: self.branch_id,
-      role_name: "agent")
-    assign_service.add_user_to_queue(self)
   end
 
   def working_today?
@@ -129,8 +129,8 @@ class User < ApplicationRecord
 
   def set_start_working_at
     self.start_working_at = Time.now.in_time_zone('America/Santiago')
+    add_user_to_order_queue
     broadcast_pusher('attendance_channel', 'attendance', {})
-    add_user_to_queue
     save
   end
 
