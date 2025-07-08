@@ -51,7 +51,7 @@ class User < ApplicationRecord
     end
 
     event :set_stand_by do
-      transitions from: [:stand_by, :working, :available, :not_available], to: :stand_by
+      transitions from: [:stand_by, :working, :available, :not_available], to: :stand_by, after: :remove_user_from_queue
     end
 
     event :end_shift do

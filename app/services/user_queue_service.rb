@@ -39,11 +39,14 @@ class UserQueueService
     # Devuelve el próximo barbero disponible (menos carga, más arriba en la cola)
   def next_available
     user_ids = Rails.cache.read(@order_cache_key)
+    return nil if user_ids.blank?
 
-    return nil if user_ids.empty?
+    # Defensa en profundidad: Verificar que los usuarios de la caché siguen disponibles en la BD
+    available_user_ids = User.where(id: user_ids, work_state: :available).pluck(:id)
+    return nil if available_user_ids.blank?
 
-    pending_counts = load_pending_counts(user_ids)
-    users = load_users(user_ids)
+    pending_counts = load_pending_counts(available_user_ids)
+    users = load_users(available_user_ids)
     # Elegimos el primero con menos pending
     users.min_by { |u| [pending_counts[u.id] || 0, queue_position(u.id)] }
   end
