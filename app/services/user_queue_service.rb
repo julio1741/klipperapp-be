@@ -26,7 +26,8 @@ class UserQueueService
     # Devuelve la cola completa en orden actual
   def queue
     user_ids = Rails.cache.read(@cache_key)
-    user_ids = build_queue if user_ids.nil? || user_ids.empty?
+    order_user_ids = Rails.cache.read(@order_cache_key)
+    user_ids = build_queue if user_ids.nil? || user_ids.empty? || order_user_ids.nil? || order_user_ids.empty?
     load_users(user_ids)
   end
 
