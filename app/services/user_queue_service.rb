@@ -6,6 +6,7 @@ class UserQueueService
     @role = Role.find_by(name: @role_name)
     @today = Time.current.in_time_zone('America/Santiago').to_date
     @cache_key = "barber_queue:org:#{@organization_id}:branch:#{@branch_id}:#{@today}"
+    @order_cache_key = "order_barber_queue:org:#{@organization_id}:branch:#{@branch_id}:#{@today}"
   end
 
   def add_user_to_queue(user)
@@ -15,10 +16,18 @@ class UserQueueService
     Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
   end
 
+  def add_user_to_order_queue(user)
+    user_ids = Rails.cache.read(@order_cache_key) || []
+    return if user_ids.include?(user.id)
+    user_ids << user.id
+    Rails.cache.write(@order_cache_key, user_ids, expires_in: 12.hours)
+  end
+
     # Devuelve la cola completa en orden actual
   def queue
     user_ids = Rails.cache.read(@cache_key)
-    user_ids = build_queue if user_ids.nil? || user_ids.empty?
+    order_user_ids = Rails.cache.read(@order_cache_key)
+    user_ids = build_queue if user_ids.nil? || user_ids.empty? || order_user_ids.nil? || order_user_ids.empty?
     load_users(user_ids)
   end
 
@@ -29,12 +38,12 @@ class UserQueueService
 
     # Devuelve el próximo barbero disponible (menos carga, más arriba en la cola)
   def next_available
-    users = queue
+    user_ids = Rails.cache.read(@order_cache_key)
 
-    return nil if users.empty?
+    return nil if user_ids.empty?
 
-    pending_counts = load_pending_counts(users.map(&:id))
-
+    pending_counts = load_pending_counts(user_ids)
+    users = load_users(user_ids)
     # Elegimos el primero con menos pending
     users.min_by { |u| [pending_counts[u.id] || 0, queue_position(u.id)] }
   end
@@ -48,6 +57,14 @@ class UserQueueService
 
   def queue_position(user_id)
     Rails.cache.read(@cache_key)&.index(user_id) || 9999
+  end
+
+  # sacar user de la cola
+  def remove(user)
+    user_ids = Rails.cache.read(@cache_key) || []
+    return unless user_ids.include?(user.id)
+    user_ids.delete(user.id)
+    Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
   end
 
     # Mueve al user que acaba de atender al final de la cola
@@ -68,6 +85,7 @@ class UserQueueService
     puts "Building initial queue for #{@organization_id} - #{@branch_id} on #{@today}: #{user_ids.inspect}"
     puts "Cache key: #{@cache_key}"
     Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
+    Rails.cache.write(@order_cache_key, user_ids, expires_in: 12.hours)
     user_ids
   end
 

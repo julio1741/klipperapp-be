@@ -31,23 +31,23 @@ class User < ApplicationRecord
     state :not_available
 
     event :start_shift do
-      transitions from: [:stand_by, :available], to: :available, after: :set_start_working_at
+      transitions from: [:stand_by, :available], to: :available, after: [:set_start_working_at]
     end
 
     event :not_available do
-      transitions from: [:available], to: :not_available, after: :send_message_to_frontend
+      transitions from: [:available], to: :not_available, guard: :no_active_attendances_today?, after: [:remove_user_from_queue, :send_message_to_frontend]
     end
 
     event :available do
-      transitions from: [:stand_by, :not_available], to: :available, after: :send_message_to_frontend
+      transitions from: [:stand_by, :not_available], to: :available, after: [:add_user_to_queue, :send_message_to_frontend]
     end
 
     event :start_attendance do
-      transitions from: [:available, :working], to: :working#, after: [:rotate_user_from_queue]
+      transitions from: [:available, :working], to: :working, after: :remove_user_from_queue
     end
 
     event :end_attendance do
-      transitions from: :working, to: :available, guard: :no_active_attendances_today?
+      transitions from: :working, to: :available, guard: :no_active_attendances_today?, after: :add_user_to_queue
     end
 
     event :set_stand_by do
@@ -59,11 +59,6 @@ class User < ApplicationRecord
     end
   end
 
-  def send_message_to_frontend
-    data = {}
-    broadcast_pusher('attendance_channel', 'attendance', data)
-  end
-
   def add_user_to_queue
     assign_service = UserQueueService.new(
       organization_id: self.organization_id,
@@ -72,12 +67,25 @@ class User < ApplicationRecord
     assign_service.add_user_to_queue(self)
   end
 
-  def rotate_user_from_queue
+  def add_user_to_order_queue
     assign_service = UserQueueService.new(
       organization_id: self.organization_id,
       branch_id: self.branch_id,
       role_name: "agent")
-    assign_service.rotate(self)
+    assign_service.add_user_to_order_queue(self)
+  end
+
+  def remove_user_from_queue
+    assign_service = UserQueueService.new(
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      role_name: "agent")
+    assign_service.remove(self)
+  end
+
+  def send_message_to_frontend
+    data = {}
+    broadcast_pusher('attendance_channel', 'attendance', data)
   end
 
   def working_today?
@@ -121,8 +129,9 @@ class User < ApplicationRecord
 
   def set_start_working_at
     self.start_working_at = Time.now.in_time_zone('America/Santiago')
-    broadcast_pusher('attendance_channel', 'attendance', {})
     add_user_to_queue
+    add_user_to_order_queue
+    broadcast_pusher('attendance_channel', 'attendance', {})
     save
   end
 

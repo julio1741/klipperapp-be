@@ -84,7 +84,15 @@ class Attendance < ApplicationRecord
       user = assign_service.next_available
       self.attended_by = user.id if user
     end
-    assign_service.rotate(self.attended_by_user)
+    data = {
+      id: self.id,
+      status: self.status,
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      attended_by: self.attended_by,
+      profile: self.profile.as_json
+    }
+    broadcast_pusher('attendance_channel', 'attendance', data)
     save
   end
 
