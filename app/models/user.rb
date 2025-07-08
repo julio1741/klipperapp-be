@@ -34,11 +34,11 @@ class User < ApplicationRecord
     end
 
     event :not_available do
-      transitions from: [:available], to: :not_available
+      transitions from: [:available], to: :not_available, after: :send_message_to_frontend
     end
 
     event :available do
-      transitions from: [:stand_by, :not_available], to: :available
+      transitions from: [:stand_by, :not_available], to: :available, after: :send_message_to_frontend
     end
 
     event :start_attendance do
@@ -56,6 +56,11 @@ class User < ApplicationRecord
     event :end_shift do
       transitions from: [:available, :working], to: :stand_by, after: :set_end_working_at_nil
     end
+  end
+
+  def send_message_to_frontend
+    data = {}
+    broadcast_pusher('attendance_channel', 'attendance', data)
   end
 
   def add_user_to_queue
