@@ -43,7 +43,7 @@ class UserQueueService
     return nil if user_ids.empty?
 
     pending_counts = load_pending_counts(user_ids)
-
+    users = load_users(user_ids)
     # Elegimos el primero con menos pending
     users.min_by { |u| [pending_counts[u.id] || 0, queue_position(u.id)] }
   end
