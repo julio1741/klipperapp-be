@@ -49,6 +49,7 @@ Rails.application.routes.draw do
         end
         member do
           patch 'not_available', to: 'users#not_available'
+          patch 'available', to: 'users#available'
         end
       end
 
