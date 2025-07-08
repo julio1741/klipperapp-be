@@ -84,6 +84,7 @@ class Attendance < ApplicationRecord
       user = assign_service.next_available
       self.attended_by = user.id if user
     end
+    broadcast_pusher('attendance_channel', 'attendance', {})
     save
   end
 
