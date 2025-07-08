@@ -312,7 +312,7 @@ module Api
         @user = User.find(params[:id])
         if @user.may_not_available?
           @user.not_available!
-          render json: { message: 'Usuario disponible' }, status: :ok
+          render json: { message: 'Usuario no disponible' }, status: :ok
         else
           render json: { error: 'No se puede poner como no disponible en este estado' }, status: :unprocessable_entity
         end
@@ -323,7 +323,7 @@ module Api
         @user = User.find(params[:id])
         if @user.may_available?
           @user.available!
-          render json: { message: 'Usuario no disponible' }, status: :ok
+          render json: { message: 'Usuario disponible' }, status: :ok
         else
           render json: { error: 'No se puede poner como disponible en este estado' }, status: :unprocessable_entity
         end
