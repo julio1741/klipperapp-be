@@ -116,12 +116,12 @@ module Api
           organization_id: organization_id,
           branch_id: branch_id,
           role_name: 'agent'
-        ).queue.select { |user| ['available', 'not_available', 'working'].include?(user.work_state) }
+        ).queue.select { |user| ['available', 'not_available'].include?(user.work_state) }
 
         # select users without attendances pending today
-        #result = result.select do |user|
-        #  Attendance.pending_attendances_today_by_user(user.id).empty?
-        #end
+        result = result.select do |user|
+          Attendance.pending_attendances_today_by_user(user.id).empty?
+        end
 
         render json: result, status: :ok
       end
