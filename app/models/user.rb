@@ -47,7 +47,7 @@ class User < ApplicationRecord
     end
 
     event :end_attendance do
-      transitions from: :working, to: :available, guard: :no_active_attendances_today?, after: [:add_user_to_queue, , :send_message_to_frontend]
+      transitions from: :working, to: :available, guard: :no_active_attendances_today?, after: [:add_user_to_queue, :send_message_to_frontend]
     end
 
     event :set_stand_by do
