@@ -116,7 +116,7 @@ module Api
           organization_id: organization_id,
           branch_id: branch_id,
           role_name: 'agent'
-        ).queue.select { |user| ['available', 'not_available'].include?(user.work_state) }
+        ).queue.select { |user| ['available', 'not_available', 'working'].include?(user.work_state) }
 
         # select users without attendances pending today
         result = result.select do |user|
