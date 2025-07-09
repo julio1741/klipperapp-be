@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_05_180001) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_09_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -77,6 +77,29 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_05_180001) do
     t.datetime "updated_at", null: false
     t.string "photo_url"
     t.index ["organization_id"], name: "index_branches_on_organization_id"
+  end
+
+  create_table "cash_reconciliations", force: :cascade do |t|
+    t.integer "reconciliation_type", default: 0, null: false
+    t.decimal "cash_amount", precision: 10, scale: 2, default: "0.0"
+    t.jsonb "bank_balances", default: []
+    t.decimal "total_calculated", precision: 10, scale: 2, default: "0.0"
+    t.decimal "expected_cash", precision: 10, scale: 2
+    t.decimal "expected_bank_transfer", precision: 10, scale: 2
+    t.decimal "expected_credit_card", precision: 10, scale: 2
+    t.decimal "difference_cash", precision: 10, scale: 2
+    t.integer "status", default: 0
+    t.text "notes"
+    t.bigint "user_id", null: false
+    t.bigint "branch_id", null: false
+    t.bigint "organization_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["branch_id"], name: "index_cash_reconciliations_on_branch_id"
+    t.index ["organization_id"], name: "index_cash_reconciliations_on_organization_id"
+    t.index ["reconciliation_type"], name: "index_cash_reconciliations_on_reconciliation_type"
+    t.index ["status"], name: "index_cash_reconciliations_on_status"
+    t.index ["user_id"], name: "index_cash_reconciliations_on_user_id"
   end
 
   create_table "expenses", force: :cascade do |t|
@@ -196,6 +219,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_05_180001) do
   add_foreign_key "branch_users", "branches"
   add_foreign_key "branch_users", "users"
   add_foreign_key "branches", "organizations"
+  add_foreign_key "cash_reconciliations", "branches"
+  add_foreign_key "cash_reconciliations", "organizations"
+  add_foreign_key "cash_reconciliations", "users"
   add_foreign_key "expenses", "branches"
   add_foreign_key "expenses", "organizations"
   add_foreign_key "expenses", "users"

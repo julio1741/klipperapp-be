@@ -29,6 +29,9 @@ Rails.application.routes.draw do
       resources :roles
       resources :services
       resources :expenses
+      resources :cash_reconciliations, only: [:index, :create] do
+        get :preview, on: :collection
+      end
 
       resources :users do
         collection do
