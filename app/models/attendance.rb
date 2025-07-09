@@ -41,11 +41,11 @@ class Attendance < ApplicationRecord
     end
 
     event :postpone do
-      transitions from: [:pending, :processing], to: :postponed
+      transitions from: [:pending, :processing], to: :postponed, after: [:send_message_to_frontend]
     end
 
     event :resume do
-      transitions from: :postponed, to: :processing, guard: :user_has_no_other_processing_attendance?
+      transitions from: :postponed, to: :processing, guard: :user_has_no_other_processing_attendance?, after: [:send_message_to_frontend]
     end
 
     event :cancel do
