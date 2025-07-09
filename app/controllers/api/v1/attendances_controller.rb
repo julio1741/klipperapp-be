@@ -119,9 +119,9 @@ module Api
         ).queue.select { |user| ['available', 'not_available', 'working'].include?(user.work_state) }
 
         # select users without attendances pending today
-        result = result.select do |user|
-          Attendance.pending_attendances_today_by_user(user.id).empty?
-        end
+        #result = result.select do |user|
+        #  Attendance.pending_attendances_today_by_user(user.id).empty?
+        #end
 
         render json: result, status: :ok
       end
