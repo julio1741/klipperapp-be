@@ -35,11 +35,11 @@ class User < ApplicationRecord
     end
 
     event :not_available do
-      transitions from: [:available], to: :not_available, guard: :no_active_attendances_today?, after: [:remove_user_from_queue, :send_message_to_frontend]
+      transitions from: [:available], to: :not_available, guard: :no_active_attendances_today?, after: :send_message_to_frontend
     end
 
     event :available do
-      transitions from: [:stand_by, :not_available], to: :available, after: [:add_user_to_queue, :send_message_to_frontend]
+      transitions from: [:stand_by, :not_available], to: :available, after: :send_message_to_frontend
     end
 
     event :start_attendance do
