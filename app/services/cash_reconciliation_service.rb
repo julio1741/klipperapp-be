@@ -39,7 +39,7 @@ class CashReconciliationService
     # No se encontró apertura, se crea una implícita en cero.
     # Se asume que el primer usuario del branch es quien la crea.
     # Esto podría ajustarse si se necesita una lógica de usuario más específica.
-    user = branch.users.first
+    user = User.find_by(branch_id: branch.id)
     return nil unless user # No se puede crear si no hay usuarios en la sucursal
 
     CashReconciliation.create!(
