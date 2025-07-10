@@ -1,50 +1,95 @@
 class CashReconciliationService
-  def initialize(branch, end_time = Time.current)
+  attr_reader :branch, :date
+
+  def initialize(branch, date_string)
     @branch = branch
-    @end_time = end_time
+    @date = date_string.present? ? Date.parse(date_string) : Date.current
   end
 
-  def perform_preview
-    last_opening = find_last_opening
-    return { error: 'No opening reconciliation found for this branch today.' } unless last_opening
+  def get_or_create_daily_report
+    # Usar un lock para prevenir race conditions si se llama al mismo tiempo
+    ActiveRecord::Base.transaction do
+      closing_reconciliation = find_daily_closing
+      return closing_reconciliation if closing_reconciliation
 
-    attendances = find_attendances_since(last_opening.created_at)
-
-    expected_cash = attendances.where(payment_method: 'cash').sum(:total_amount) + last_opening.cash_amount
-    expected_bank_transfer = attendances.where(payment_method: 'transfer').sum(:total_amount)
-    expected_credit_card = attendances.where(payment_method: 'card').sum(:total_amount)
-
-    # Sumar los saldos bancarios iniciales
-    initial_bank_total = last_opening.bank_balances.sum { |acc| acc['balance'].to_f }
-    current_bank_total = expected_bank_transfer + expected_credit_card + initial_bank_total
-
-    {
-      last_opening_time: last_opening.created_at,
-      preview_time: @end_time,
-      initial_cash: last_opening.cash_amount,
-      initial_bank_total: initial_bank_total,
-      expected_cash_from_sales: attendances.where(payment_method: 'cash').sum(:total_amount),
-      expected_bank_from_sales: expected_bank_transfer + expected_credit_card,
-      expected_total_cash_on_hand: expected_cash,
-      expected_total_bank_balance: current_bank_total
-    }
+      opening_reconciliation = find_or_create_daily_opening
+      create_and_return_daily_closing(opening_reconciliation)
+    end
   end
 
   private
 
-  def find_last_opening
-    CashReconciliation.where(
-      branch_id: @branch.id,
-      reconciliation_type: :opening
-    ).where('created_at <= ?', @end_time)
-     .order(created_at: :desc)
-     .first
+  def find_daily_closing
+    CashReconciliation.find_by(
+      branch_id: branch.id,
+      reconciliation_type: :closing,
+      created_at: date.all_day
+    )
   end
 
-  def find_attendances_since(start_time)
-    Attendance.where(
-      branch_id: @branch.id,
-      created_at: start_time..@end_time
-    ).where(status: [:completed, :paid]) # Asumiendo estos estados
+  def find_or_create_daily_opening
+    opening = CashReconciliation.find_by(
+      branch_id: branch.id,
+      reconciliation_type: :opening,
+      created_at: date.all_day
+    )
+
+    return opening if opening
+
+    # No se encontró apertura, se crea una implícita en cero.
+    # Se asume que el primer usuario del branch es quien la crea.
+    # Esto podría ajustarse si se necesita una lógica de usuario más específica.
+    user = branch.users.first
+    return nil unless user # No se puede crear si no hay usuarios en la sucursal
+
+    CashReconciliation.create!(
+      reconciliation_type: :opening,
+      cash_amount: 0,
+      bank_balances: [],
+      notes: "Apertura automática generada por el sistema.",
+      user: user,
+      branch: branch,
+      organization: branch.organization,
+      created_at: date.beginning_of_day
+    )
+  end
+
+  def create_and_return_daily_closing(opening)
+    return nil unless opening
+
+    attendances = Attendance.where(
+      branch_id: branch.id,
+      created_at: opening.created_at..date.end_of_day
+    ).where(status: [:completed, :paid])
+
+    expected_cash_from_sales = attendances.where(payment_method: 'cash').sum(:total_amount)
+    expected_bank_from_sales = attendances.where(payment_method: ['transfer', 'card']).sum(:total_amount)
+
+    final_cash = opening.cash_amount + expected_cash_from_sales
+    final_bank_balances = calculate_final_bank_balances(opening.bank_balances, expected_bank_from_sales)
+
+    CashReconciliation.create!(
+      reconciliation_type: :closing,
+      cash_amount: final_cash,
+      bank_balances: final_bank_balances,
+      notes: "Cierre automático generado por el sistema.",
+      user: opening.user, # Usar el mismo usuario de la apertura
+      branch: branch,
+      organization: branch.organization,
+      created_at: date.end_of_day
+    )
+  end
+
+  def calculate_final_bank_balances(initial_balances, sales_total)
+    # Esta es una simplificación. Asume que todas las ventas van a una cuenta genérica.
+    # Se podría mejorar si se tuviera un mapeo de payment_method a una cuenta específica.
+    final_balances = initial_balances.dup
+    if final_balances.empty?
+      final_balances << { 'account_name' => 'Cuentas Bancarias', 'balance' => sales_total }
+    else
+      # Asumimos que todo se suma a la primera cuenta por simplicidad
+      final_balances[0]['balance'] = final_balances[0]['balance'].to_f + sales_total
+    end
+    final_balances
   end
 end

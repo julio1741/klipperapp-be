@@ -24,14 +24,34 @@ class CashReconciliation < ApplicationRecord
   end
 
   def calculate_and_verify_closing_amounts
-    service_data = CashReconciliationService.new(self.branch, self.created_at || Time.current).perform_preview
+    opening_date = self.created_at || Time.current
 
-    return if service_data[:error] # No se puede verificar si no hay una apertura previa
+    last_opening = self.class.find_by(
+      branch_id: self.branch_id,
+      reconciliation_type: :opening,
+      created_at: opening_date.all_day
+    )
 
-    self.expected_cash = service_data[:expected_total_cash_on_hand]
-    self.expected_bank_transfer = service_data[:expected_bank_from_sales] # Asumiendo que transfer y card van a cuentas
-    self.expected_credit_card = 0 # O ajustar según la lógica de negocio
+    unless last_opening
+      last_opening = self.class.create!(
+        reconciliation_type: :opening,
+        cash_amount: 0,
+        bank_balances: [],
+        notes: "Apertura automática generada por el sistema.",
+        user: self.user,
+        branch: self.branch,
+        organization: self.organization,
+        created_at: opening_date.beginning_of_day
+      )
+    end
 
+    attendances = Attendance.where(
+      branch_id: self.branch_id,
+      created_at: last_opening.created_at..opening_date
+    ).where(status: [:completed, :paid])
+
+    self.expected_cash = last_opening.cash_amount + attendances.where(payment_method: 'cash').sum(:total_amount)
+    # Lógica similar para bancos...
     self.difference_cash = self.cash_amount - self.expected_cash
 
     self.status = (difference_cash.abs < 0.01) ? :verified : :discrepancy
