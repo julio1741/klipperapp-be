@@ -18,7 +18,7 @@ class CashReconciliation < ApplicationRecord
   # == Callbacks ==
   before_validation :set_total_calculated
   before_save :calculate_and_verify_closing_amounts, if: :closing?
-  before_update :prevent_modification_if_approved # Nuevo callback
+  before_update :prevent_modification_if_approved, if: :approved?
 
   # == AASM ==
   aasm column: :status, enum: true do # Usar enum para AASM
@@ -39,7 +39,7 @@ class CashReconciliation < ApplicationRecord
   end
 
   def prevent_modification_if_approved
-    if approved? && changed? && !changes.keys.include?('status') && !changes.keys.include?('approved_at') && !changes.keys.include?('approved_by_user_id')
+    if changed? && !(changes.keys - ["status", "approved_at", "approved_by_user_id"]).empty?
       errors.add(:base, "No se puede modificar un arqueo de caja aprobado.")
       throw :abort
     end
