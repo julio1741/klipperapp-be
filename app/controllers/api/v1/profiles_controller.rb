@@ -5,7 +5,7 @@ module Api
       before_action :set_profile, only: [:show, :update, :destroy]
 
       def index
-        profiles = @current_user.organization.profiles.order(created_at: :desc)
+        profiles = Profile.where(organization_id: @current_user.organization_id).order(created_at: :desc)
         render json: profiles, status: :ok
       end
 
