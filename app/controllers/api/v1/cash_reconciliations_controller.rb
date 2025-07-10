@@ -10,12 +10,12 @@ module Api
 
       def preview
         service = CashReconciliationService.new(@current_user.branch, params[:date])
-        report = service.get_or_create_daily_report
+        preview_data = service.perform_preview
 
-        if report
-          render json: report, status: :ok
+        if preview_data[:error]
+          render json: { error: preview_data[:error] }, status: :unprocessable_entity
         else
-          render json: { error: "Could not generate the report. The branch may not have any users assigned to create an automatic reconciliation." }, status: :not_found
+          render json: preview_data, status: :ok
         end
       end
 
