@@ -51,7 +51,7 @@ module Api
         search_terms = query.split(/\s+/).map { |term| "%#{term.downcase}%" }
 
         # Construye una consulta que busca cada término en cualquiera de los campos
-        profiles = @current_user.organization.profiles.where(
+        profiles = Profile.where(organization_id: @current_user.organization_id).where(
           search_terms.map {
             "(LOWER(name) ILIKE ? OR phone_number ILIKE ? OR LOWER(email) ILIKE ?)"
           }.join(' AND '),
