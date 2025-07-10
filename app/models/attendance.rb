@@ -51,6 +51,10 @@ class Attendance < ApplicationRecord
     event :cancel do
       transitions from: [:pending, :processing, :completed, :postponed], to: :canceled
     end
+
+    event :reopen do
+      transitions from: :completed, to: :processing, after: :reactivate_user_for_service
+    end
   end
 
   def send_message_to_frontend
@@ -197,5 +201,19 @@ class Attendance < ApplicationRecord
       .where.not(id: id)
       .where("created_at >= ?", Time.now.in_time_zone('America/Santiago').beginning_of_day)
       .none?
+  end
+
+  private
+
+  def reactivate_user_for_service
+    return unless attended_by_user
+
+    # Si el usuario estaba 'available', debe pasar a 'working' y salir de la cola.
+    # El evento start_attendance! en User ya maneja esta lógica.
+    if attended_by_user.may_start_attendance?
+      attended_by_user.start_attendance!
+    end
+
+    send_message_to_frontend
   end
 end

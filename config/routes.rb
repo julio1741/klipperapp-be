@@ -15,6 +15,9 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :attendances do
+        member do
+          patch :reopen
+        end
         collection do
           get 'by_users_working_today', to: 'attendances#by_users_working_today'
           get 'by_users_queue', to: 'attendances#by_users_queue'

@@ -108,6 +108,16 @@ module Api
         head :no_content
       end
 
+      def reopen
+        @attendance = Attendance.find(params[:id])
+        if @attendance.may_reopen?
+          @attendance.reopen!
+          render json: { message: "Attendance has been reopened successfully." }, status: :ok
+        else
+          render json: { error: "Cannot reopen attendance in its current state." }, status: :unprocessable_entity
+        end
+      end
+
       def by_users_queue
         organization_id = @current_user.organization_id
         branch_id = @current_user.branch_id
