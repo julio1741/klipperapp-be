@@ -230,6 +230,7 @@ module Api
           :organization_amount,
           :start_attendance_at,
           :end_attendance_at,
+          :tip_amount,
           service_ids: []
         )
       end
