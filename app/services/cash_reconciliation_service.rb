@@ -16,10 +16,10 @@ class CashReconciliationService
     attendances = find_attendances_since(opening.created_at, end_time)
 
     expected_cash_from_sales = attendances.where(payment_method: 'cash').sum(:total_amount)
-    expected_bank_from_sales = attendances.where(payment_method: ['transfer', 'card']).sum(:total_amount)
+    expected_pos_from_sales = attendances.where(payment_method: 'card').sum(:total_amount)
+    expected_transfer_from_sales = attendances.where(payment_method: 'transfer').sum(:total_amount)
 
     total_cash = opening.cash_amount + expected_cash_from_sales
-    total_bank = opening.bank_balances.sum { |acc| acc['balance'].to_f } + expected_bank_from_sales
 
     {
       opening_reconciliation_id: opening.id,
@@ -28,9 +28,11 @@ class CashReconciliationService
       initial_cash: opening.cash_amount,
       initial_bank_total: opening.bank_balances.sum { |acc| acc['balance'].to_f },
       expected_cash_from_sales: expected_cash_from_sales,
-      expected_bank_from_sales: expected_bank_from_sales,
+      expected_pos_from_sales: expected_pos_from_sales,
+      expected_transfer_from_sales: expected_transfer_from_sales,
       expected_total_cash_on_hand: total_cash,
-      expected_total_bank_balance: total_bank
+      expected_total_pos_balance: expected_pos_from_sales, # Asumiendo que el POS inicial es 0
+      expected_total_transfer_balance: expected_transfer_from_sales # Asumiendo que el transfer inicial es 0
     }
   end
 
