@@ -28,7 +28,9 @@ Rails.application.routes.draw do
         end
       end
       resources :branches
-      resources :profiles
+      resources :profiles do
+        get :search, on: :collection
+      end
       resources :roles
       resources :services
       resources :expenses

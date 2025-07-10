@@ -5,39 +5,32 @@ module Api
       before_action :set_profile, only: [:show, :update, :destroy]
 
       def index
-        if params[:phone_number].present?
-          @profile = Profile.find_by(phone_number: params[:phone_number])
-          if @profile
-            organizatiopn_id = @current_user.organization_id
-            is_attended_today = Attendance.profile_in_attendance_today?(@profile.id)
-            render json: { profile: @profile, is_attended_today: is_attended_today }
-          else
-            render json: { error: "Profile not found" }, status: :not_found
-          end
-        else
-          @profiles = @filtered_records || Profile.all
-          render json: @profiles
-        end
+        profiles = @current_user.organization.profiles.order(created_at: :desc)
+        render json: profiles, status: :ok
       end
 
       def show
-        render json: @profile
+        render json: @profile, status: :ok
       end
 
       def create
         @profile = Profile.new(profile_params)
+        @profile.organization = @current_user.organization
+        # Asignar branch si es relevante para el perfil directamente
+        # @profile.branch = @current_user.branch
+
         if @profile.save
           render json: @profile, status: :created
         else
-          render json: @profile.errors, status: :unprocessable_entity
+          render json: { errors: @profile.errors.full_messages }, status: :unprocessable_entity
         end
       end
 
       def update
         if @profile.update(profile_params)
-          render json: @profile
+          render json: @profile, status: :ok
         else
-          render json: @profile.errors, status: :unprocessable_entity
+          render json: { errors: @profile.errors.full_messages }, status: :unprocessable_entity
         end
       end
 
@@ -46,21 +39,34 @@ module Api
         head :no_content
       end
 
+      def search
+        query = params[:query]
+
+        if query.blank? || query.length < 3
+          render json: [], status: :ok
+          return
+        end
+
+        # Búsqueda ILIKE para PostgreSQL (case-insensitive)
+        search_term = "%#{query.downcase}%".gsub(/\s+/, '%')
+
+        profiles = @current_user.organization.profiles.where(
+          "LOWER(name) ILIKE :search OR phone_number ILIKE :search OR LOWER(email) ILIKE :search",
+          { search: search_term }
+        ).limit(10)
+
+        render json: profiles, status: :ok
+      end
+
       private
 
       def set_profile
-        @profile = Profile.find(params[:id])
+        @profile = @current_user.organization.profiles.find(params[:id])
       end
 
       def profile_params
         params.require(:profile).permit(
-          :name,
-          :email,
-          :birth_date,
-          :phone_number,
-          :organization_id,
-          :branch_id,
-          :photo_url
+          :name, :email, :phone_number, :birth_date, :branch_id
         )
       end
     end
