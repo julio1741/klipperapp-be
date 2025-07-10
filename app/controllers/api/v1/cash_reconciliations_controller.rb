@@ -20,15 +20,17 @@ module Api
       end
 
       def create
-        # Lógica de "Find or Initialize" para el cierre del día actual
+        reconciliation_date = params[:cash_reconciliation][:reconciliation_date].present? ? Date.parse(params[:cash_reconciliation][:reconciliation_date]) : Time.current.to_date
+
         reconciliation = @current_user.branch.cash_reconciliations.find_or_initialize_by(
           reconciliation_type: :closing,
-          created_at: (Time.current.beginning_of_day..Time.current.end_of_day)
+          created_at: (reconciliation_date.beginning_of_day..reconciliation_date.end_of_day)
         )
 
-        reconciliation.assign_attributes(cash_reconciliation_params)
+        reconciliation.assign_attributes(cash_reconciliation_params.except(:reconciliation_date))
         reconciliation.user = @current_user unless reconciliation.persisted?
         reconciliation.organization = @current_user.organization unless reconciliation.persisted?
+        reconciliation.created_at = reconciliation_date.end_of_day # Establecer la fecha de creación al final del día
 
         if reconciliation.save
           render json: reconciliation, status: reconciliation.previously_new_record? ? :created : :ok
@@ -44,6 +46,7 @@ module Api
           :reconciliation_type,
           :cash_amount,
           :notes,
+          :reconciliation_date, # Permitir el nuevo parámetro de fecha
           bank_balances: [:account_name, :balance]
         )
       end
