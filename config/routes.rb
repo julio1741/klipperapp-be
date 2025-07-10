@@ -36,6 +36,9 @@ Rails.application.routes.draw do
       resources :expenses
       resources :cash_reconciliations, only: [:index, :create] do
         get :preview, on: :collection
+        member do
+          patch :approve
+        end
       end
 
       resources :users do

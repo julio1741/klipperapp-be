@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_10_200000) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_10_220000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -97,6 +97,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_10_200000) do
     t.datetime "updated_at", null: false
     t.decimal "difference_pos", precision: 10, scale: 2
     t.decimal "difference_transfer", precision: 10, scale: 2
+    t.datetime "approved_at"
+    t.bigint "approved_by_user_id"
+    t.index ["approved_by_user_id"], name: "index_cash_reconciliations_on_approved_by_user_id"
     t.index ["branch_id"], name: "index_cash_reconciliations_on_branch_id"
     t.index ["organization_id"], name: "index_cash_reconciliations_on_organization_id"
     t.index ["reconciliation_type"], name: "index_cash_reconciliations_on_reconciliation_type"
@@ -224,6 +227,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_10_200000) do
   add_foreign_key "cash_reconciliations", "branches"
   add_foreign_key "cash_reconciliations", "organizations"
   add_foreign_key "cash_reconciliations", "users"
+  add_foreign_key "cash_reconciliations", "users", column: "approved_by_user_id"
   add_foreign_key "expenses", "branches"
   add_foreign_key "expenses", "organizations"
   add_foreign_key "expenses", "users"

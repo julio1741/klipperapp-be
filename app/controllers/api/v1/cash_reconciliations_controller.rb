@@ -39,6 +39,18 @@ module Api
         end
       end
 
+      def approve
+        @reconciliation = CashReconciliation.find(params[:id])
+        if @reconciliation.may_approve?
+          @reconciliation.approved_at = Time.current
+          @reconciliation.approved_by_user = @current_user
+          @reconciliation.approve!
+          render json: @reconciliation, status: :ok
+        else
+          render json: { error: "No se puede aprobar este arqueo de caja." }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def cash_reconciliation_params

@@ -1,12 +1,15 @@
 class CashReconciliation < ApplicationRecord
+  include AASM # Añadir AASM
+
   # == Associations ==
   belongs_to :user
   belongs_to :branch
   belongs_to :organization
+  belongs_to :approved_by_user, class_name: "User", optional: true # Nueva asociación
 
   # == Enums ==
   enum reconciliation_type: { opening: 0, closing: 1 }
-  enum status: { verified: 0, discrepancy: 1, unverified: 2 }
+  enum status: { verified: 0, discrepancy: 1, unverified: 2, approved: 3 } # Nuevo estado
 
   # == Validations ==
   validates :reconciliation_type, :cash_amount, :total_calculated, :status, presence: true
@@ -15,8 +18,32 @@ class CashReconciliation < ApplicationRecord
   # == Callbacks ==
   before_validation :set_total_calculated
   before_save :calculate_and_verify_closing_amounts, if: :closing?
+  before_update :prevent_modification_if_approved # Nuevo callback
+
+  # == AASM ==
+  aasm column: :status, enum: true do # Usar enum para AASM
+    state :verified, initial: true
+    state :discrepancy
+    state :unverified
+    state :approved
+
+    event :approve do
+      transitions from: [:verified, :discrepancy, :unverified], to: :approved, after: :set_approval_details
+    end
+  end
 
   private
+
+  def set_approval_details
+    # Los detalles de aprobación se asignarán desde el controlador
+  end
+
+  def prevent_modification_if_approved
+    if approved? && changed? && !changes.keys.include?('status') && !changes.keys.include?('approved_at') && !changes.keys.include?('approved_by_user_id')
+      errors.add(:base, "No se puede modificar un arqueo de caja aprobado.")
+      throw :abort
+    end
+  end
 
   def set_total_calculated
     bank_total = bank_balances.sum { |account| account['balance'].to_f || 0 }
