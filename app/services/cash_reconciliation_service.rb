@@ -73,6 +73,6 @@ class CashReconciliationService
     Attendance.where(
       branch_id: branch.id,
       created_at: start_time..end_time
-    ).where(status: [:finished])
+    ).where(status: :finished)
   end
 end

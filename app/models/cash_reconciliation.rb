@@ -48,7 +48,7 @@ class CashReconciliation < ApplicationRecord
     attendances = Attendance.where(
       branch_id: self.branch_id,
       created_at: last_opening.created_at..opening_date
-    ).where(status: [:completed, :paid])
+    ).where(status: :finished)
 
     self.expected_cash = last_opening.cash_amount + attendances.where(payment_method: 'cash').sum(:total_amount)
     # Lógica similar para bancos...
