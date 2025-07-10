@@ -50,10 +50,30 @@ class CashReconciliation < ApplicationRecord
       created_at: last_opening.created_at..opening_date
     ).where(status: :finished)
 
-    self.expected_cash = last_opening.cash_amount + attendances.where(payment_method: 'cash').sum(:total_amount)
-    # Lógica similar para bancos...
+    # Cálculos de montos esperados
+    expected_cash_sales = attendances.where(payment_method: 'cash').sum(:total_amount)
+    self.expected_cash = last_opening.cash_amount + expected_cash_sales
+
+    expected_pos_sales = attendances.where(payment_method: 'card').sum(:total_amount)
+    self.expected_credit_card = expected_pos_sales # Usamos este campo para el esperado de POS
+
+    expected_transfer_sales = attendances.where(payment_method: 'transfer').sum(:total_amount)
+    self.expected_bank_transfer = expected_transfer_sales # Y este para el esperado de Transfer
+
+    # Cálculos de diferencias
     self.difference_cash = self.cash_amount - self.expected_cash
 
-    self.status = (difference_cash.abs < 0.01) ? :verified : :discrepancy
+    counted_pos = self.bank_balances.find { |b| b['account_name'].to_s.downcase.include?('pos') }&.[]('balance').to_f || 0
+    self.difference_pos = counted_pos - expected_pos_sales
+
+    counted_transfer = self.bank_balances.find { |b| b['account_name'].to_s.downcase.include?('transfer') }&.[]('balance').to_f || 0
+    self.difference_transfer = counted_transfer - expected_transfer_sales
+
+    # Verificación de status general
+    if difference_cash.abs < 0.01 && difference_pos.abs < 0.01 && difference_transfer.abs < 0.01
+      self.status = :verified
+    else
+      self.status = :discrepancy
+    end
   end
 end

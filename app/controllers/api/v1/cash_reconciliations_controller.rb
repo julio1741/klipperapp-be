@@ -20,13 +20,18 @@ module Api
       end
 
       def create
-        reconciliation = CashReconciliation.new(cash_reconciliation_params)
-        reconciliation.user = @current_user
-        reconciliation.branch = @current_user.branch
-        reconciliation.organization = @current_user.organization
+        # Lógica de "Find or Initialize" para el cierre del día actual
+        reconciliation = @current_user.branch.cash_reconciliations.find_or_initialize_by(
+          reconciliation_type: :closing,
+          created_at: (Time.current.beginning_of_day..Time.current.end_of_day)
+        )
+
+        reconciliation.assign_attributes(cash_reconciliation_params)
+        reconciliation.user = @current_user unless reconciliation.persisted?
+        reconciliation.organization = @current_user.organization unless reconciliation.persisted?
 
         if reconciliation.save
-          render json: reconciliation, status: :created
+          render json: reconciliation, status: reconciliation.previously_new_record? ? :created : :ok
         else
           render json: { errors: reconciliation.errors.full_messages }, status: :unprocessable_entity
         end
