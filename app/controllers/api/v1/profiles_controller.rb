@@ -42,17 +42,20 @@ module Api
       def search
         query = params[:query]
 
-        if query.blank? || query.length < 3
+        if query.blank? || query.length < 2
           render json: [], status: :ok
           return
         end
 
-        # Búsqueda ILIKE para PostgreSQL (case-insensitive)
-        search_term = "%#{query.downcase}%".gsub(/\s+/, '%')
+        # Divide la consulta en términos individuales
+        search_terms = query.split(/\s+/).map { |term| "%#{term.downcase}%" }
 
+        # Construye una consulta que busca cada término en cualquiera de los campos
         profiles = @current_user.organization.profiles.where(
-          "LOWER(name) ILIKE :search OR phone_number ILIKE :search OR LOWER(email) ILIKE :search",
-          { search: search_term }
+          search_terms.map {
+            "(LOWER(name) ILIKE ? OR phone_number ILIKE ? OR LOWER(email) ILIKE ?)"
+          }.join(' AND '),
+          *search_terms.flat_map { |term| [term, term, term] }
         ).limit(10)
 
         render json: profiles, status: :ok
