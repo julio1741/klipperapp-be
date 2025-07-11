@@ -58,6 +58,7 @@ class Attendance < ApplicationRecord
   end
 
   def send_message_to_frontend
+    self.reload
     data = {
       id: self.id,
       status: self.status,
