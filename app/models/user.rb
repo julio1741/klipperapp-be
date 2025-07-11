@@ -9,6 +9,7 @@ class User < ApplicationRecord
   belongs_to :branch, optional: true # Ahora un usuario pertenece a un branch
   has_many :attendances, foreign_key: :attended_by, dependent: :destroy
   has_many :payments
+  has_many :push_subscriptions, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true
   validates :name, :phone_number, presence: true
