@@ -7,7 +7,7 @@ class UserQueueService
     @today = Time.current.in_time_zone('America/Santiago').to_date
     @cache_key = "barber_queue:org:#{@organization_id}:branch:#{@branch_id}:#{@today}"
     @order_cache_key = "order_barber_queue:org:#{@organization_id}:branch:#{@branch_id}:#{@today}"
-    @redis = Rails.cache.redis
+    @redis = $redis
   end
 
   # ATOMIC: Adds a user to the end of the queue if they are not already present.
