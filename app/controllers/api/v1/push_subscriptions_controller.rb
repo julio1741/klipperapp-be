@@ -13,6 +13,17 @@ module Api
         end
       end
 
+      def destroy
+        subscription = @current_user.push_subscriptions.find_by("subscription_data->>'endpoint' = ?", params[:endpoint])
+
+        if subscription
+          subscription.destroy
+          render json: { message: "Subscription removed." }, status: :ok
+        else
+          render json: { error: "Subscription not found." }, status: :not_found
+        end
+      end
+
       private
 
       def subscription_params

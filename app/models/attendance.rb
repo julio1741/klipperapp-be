@@ -97,6 +97,7 @@ class Attendance < ApplicationRecord
       attended_by: self.attended_by,
       profile: self.profile.as_json
     }
+    send_notification_to_user
     broadcast_pusher('attendance_channel', 'attendance', data)
     save
   end
@@ -171,6 +172,12 @@ class Attendance < ApplicationRecord
   end
 
   private
+
+  def send_notification_to_user
+      title = "Nuevo cliente en tu fila!"
+      body = "a trabajar!"
+      PushNotificationJob.perform_later(self.id, title, body)
+  end
 
   def generate_nid
     today = Time.now.in_time_zone('America/Santiago').to_date

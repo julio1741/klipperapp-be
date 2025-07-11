@@ -83,7 +83,7 @@ Rails.application.routes.draw do
           patch :resend
         end
       end
-      resources :push_subscriptions, only: [:create]
+      resources :push_subscriptions, only: [:create, :destroy]
     end
   end
 end
