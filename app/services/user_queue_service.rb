@@ -7,47 +7,50 @@ class UserQueueService
     @today = Time.current.in_time_zone('America/Santiago').to_date
     @cache_key = "barber_queue:org:#{@organization_id}:branch:#{@branch_id}:#{@today}"
     @order_cache_key = "order_barber_queue:org:#{@organization_id}:branch:#{@branch_id}:#{@today}"
+    @redis = Rails.cache.redis
   end
 
+  # ATOMIC: Adds a user to the end of the queue if they are not already present.
   def add_user_to_queue(user)
-    user_ids = Rails.cache.read(@cache_key) || []
-    return if user_ids.include?(user.id)
-    user_ids << user.id
-    Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
+    @redis.rpush(@cache_key, user.id) unless user_in_queue?(user.id)
+    set_expiry
   end
 
+  # ATOMIC: Adds a user to the end of the order queue if they are not already present.
   def add_user_to_order_queue(user)
-    user_ids = Rails.cache.read(@order_cache_key) || []
-    return if user_ids.include?(user.id)
-    user_ids << user.id
-    Rails.cache.write(@order_cache_key, user_ids, expires_in: 12.hours)
+    @redis.rpush(@order_cache_key, user.id) unless user_in_order_queue?(user.id)
+    set_expiry
   end
 
-    # Devuelve la cola completa en orden actual
+  # ATOMIC: Returns the complete queue in its current order.
   def queue
-    user_ids = Rails.cache.read(@cache_key)
-    order_user_ids = Rails.cache.read(@order_cache_key)
-    user_ids = build_queue if user_ids.nil? || user_ids.empty? || order_user_ids.nil? || order_user_ids.empty?
+    user_ids = @redis.lrange(@cache_key, 0, -1).map(&:to_i)
+    order_user_ids = @redis.lrange(@order_cache_key, 0, -1).map(&:to_i)
+    
+    if user_ids.empty? || order_user_ids.empty?
+      user_ids = build_queue
+    end
+    
     load_users(user_ids)
   end
 
   def load_users(user_ids)
+    return [] if user_ids.empty?
     users = User.where(id: user_ids).index_by(&:id)
     user_ids.map { |id| users[id] }.compact
   end
 
-    # Devuelve el próximo barbero disponible (menos carga, más arriba en la cola)
+  # Returns the next available barber (least busy, highest in queue).
   def next_available
-    user_ids = Rails.cache.read(@order_cache_key)
+    user_ids = @redis.lrange(@order_cache_key, 0, -1).map(&:to_i)
     return nil if user_ids.blank?
 
-    # Defensa en profundidad: Verificar que los usuarios de la caché siguen disponibles en la BD
     available_user_ids = User.where(id: user_ids, work_state: :available).pluck(:id)
     return nil if available_user_ids.blank?
 
     pending_counts = load_pending_counts(available_user_ids)
     users = load_users(available_user_ids)
-    # Elegimos el primero con menos pending
+    
     users.min_by { |u| [pending_counts[u.id] || 0, queue_position(u.id)] }
   end
 
@@ -59,37 +62,59 @@ class UserQueueService
   end
 
   def queue_position(user_id)
-    Rails.cache.read(@cache_key)&.index(user_id) || 9999
+    @redis.lrange(@cache_key, 0, -1).map(&:to_i).index(user_id) || 9999
   end
 
-  # sacar user de la cola
+  # ATOMIC: Removes a user from both queues.
   def remove(user)
-    user_ids = Rails.cache.read(@cache_key) || []
-    return unless user_ids.include?(user.id)
-    user_ids.delete(user.id)
-    Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
+    @redis.lrem(@cache_key, 0, user.id)
+    @redis.lrem(@order_cache_key, 0, user.id)
   end
 
-    # Mueve al user que acaba de atender al final de la cola
+  # ATOMIC: Moves a user who just finished a service to the end of the queue.
   def rotate(user)
-    user_ids = Rails.cache.read(@cache_key) || []
-    user_ids.delete(user.id)
-    user_ids << user.id
-    Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
+    # Remove from anywhere in the list, then add to the end.
+    @redis.lrem(@cache_key, 0, user.id)
+    @redis.rpush(@cache_key, user.id)
+    set_expiry
   end
 
-   # Crea la cola inicial ordenada por llegada
+  # ATOMIC: Creates the initial queue ordered by arrival time.
   def build_queue
     user_ids = User
       .where(organization_id: @organization_id, branch_id: @branch_id, role_id: @role.id, work_state: :available)
       .where('DATE(start_working_at) >= ?', @today)
       .order(:start_working_at)
       .pluck(:id)
+
     puts "Building initial queue for #{@organization_id} - #{@branch_id} on #{@today}: #{user_ids.inspect}"
     puts "Cache key: #{@cache_key}"
-    Rails.cache.write(@cache_key, user_ids, expires_in: 12.hours)
-    Rails.cache.write(@order_cache_key, user_ids, expires_in: 12.hours)
+
+    # Use a transaction to ensure both queues are built atomically
+    @redis.multi do |multi|
+      multi.del(@cache_key)
+      multi.del(@order_cache_key)
+      multi.rpush(@cache_key, user_ids) if user_ids.present?
+      multi.rpush(@order_cache_key, user_ids) if user_ids.present?
+    end
+    
+    set_expiry
     user_ids
   end
 
+  private
+
+  def user_in_queue?(user_id)
+    @redis.lrange(@cache_key, 0, -1).include?(user_id.to_s)
+  end
+
+  def user_in_order_queue?(user_id)
+    @redis.lrange(@order_cache_key, 0, -1).include?(user_id.to_s)
+  end
+
+  # Sets a 12-hour expiry on the Redis keys to prevent them from living forever.
+  def set_expiry
+    @redis.expire(@cache_key, 12.hours.to_i)
+    @redis.expire(@order_cache_key, 12.hours.to_i)
+  end
 end
