@@ -217,6 +217,5 @@ class Attendance < ApplicationRecord
     end
 
     self.reload # Asegura que el status esté actualizado tras la transición
-    send_message_to_frontend
   end
 end

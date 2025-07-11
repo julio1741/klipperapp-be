@@ -112,6 +112,8 @@ module Api
         @attendance = Attendance.find(params[:id])
         if @attendance.may_reopen?
           @attendance.reopen!
+          @attendance.reload
+          @attendance.send_message_to_frontend
           render json: { message: "Attendance has been reopened successfully." }, status: :ok
         else
           render json: { error: "Cannot reopen attendance in its current state." }, status: :unprocessable_entity
