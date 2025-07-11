@@ -56,14 +56,22 @@ module Api
         attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
           .where(status: [:completed, :finished, :canceled])
 
-        if year && year > 0
-          attendances = attendances.where("EXTRACT(YEAR FROM created_at) = ?", year)
-        end
-        if month && month > 0
-          attendances = attendances.where("EXTRACT(MONTH FROM created_at) = ?", month)
-        end
-        if day && day > 0
-          attendances = attendances.where("EXTRACT(DAY FROM created_at) = ?", day)
+        if year && year > 0 && month && month > 0 && day && day > 0
+          # Filtrado seguro por rango de fechas considerando zona horaria
+          tz = ActiveSupport::TimeZone['America/Santiago']
+          start_date = tz.local(year, month, day).beginning_of_day
+          end_date = tz.local(year, month, day).end_of_day
+          attendances = attendances.where(created_at: start_date..end_date)
+        else
+          if year && year > 0
+            attendances = attendances.where("EXTRACT(YEAR FROM created_at AT TIME ZONE 'America/Santiago') = ?", year)
+          end
+          if month && month > 0
+            attendances = attendances.where("EXTRACT(MONTH FROM created_at AT TIME ZONE 'America/Santiago') = ?", month)
+          end
+          if day && day > 0
+            attendances = attendances.where("EXTRACT(DAY FROM created_at AT TIME ZONE 'America/Santiago') = ?", day)
+          end
         end
 
         yesterday = Time.now.in_time_zone('America/Santiago').beginning_of_day
