@@ -67,9 +67,9 @@ module Api
         end
 
         yesterday = Time.now.in_time_zone('America/Santiago').beginning_of_day
-        attendances = attendances.where("created_at <= ?", yesterday)
+        attendances = attendances.where("created_at <= ?", yesterday) unless day
 
-        attendances = attendances.order("{sort} {dir}")
+        attendances = attendances.order("#{sort} #{dir}")
 
         render json: attendances.map { |attendance|
           attendance.as_json(include: {
