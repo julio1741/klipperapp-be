@@ -42,6 +42,10 @@ class User < ApplicationRecord
       transitions from: [:stand_by, :not_available], to: :available, after: :send_message_to_frontend
     end
 
+    event :start_working do
+      transitions from: [:stand_by, :not_available, :available], to: :working, after: [:remove_user_from_queue]
+    end
+
     event :start_attendance do
       transitions from: [:available, :working], to: :working, after: [:remove_user_from_queue, :send_message_to_frontend]
     end

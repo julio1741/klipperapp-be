@@ -100,6 +100,7 @@ module Api
         if @attendance.save
           @attendance.services = Service.where(id: params[:service_ids]) if params[:service_ids].present?
           @attendance.child_attendances << Attendance.where(id: params[:child_attendance_ids]) if params[:child_attendance_ids].present?
+          @attendance.attended_by_user.start_working! if @attendance.attended_by_user.may_start_working?
           @attendance.send_message_to_frontend
           render json: @attendance.as_json(include: {
           attended_by_user: {},
