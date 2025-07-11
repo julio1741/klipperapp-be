@@ -53,20 +53,19 @@ class Attendance < ApplicationRecord
     end
 
     event :reopen do
-      transitions from: :completed, to: :processing, after: :reactivate_user_for_service
+      transitions from: :completed, to: :processing, guard: :user_has_no_other_processing_attendance?, after: :reactivate_user_for_service
     end
   end
 
   def send_message_to_frontend
     # Forzamos a recargar el objeto y refrescar el status desde la base de datos
-    fresh = Attendance.find(self.id)
     data = {
-      id: fresh.id,
-      status: fresh.status,
-      organization_id: fresh.organization_id,
-      branch_id: fresh.branch_id,
-      attended_by: fresh.attended_by,
-      profile: fresh.profile.as_json
+      id: self.id,
+      status: self.status,
+      organization_id: self.organization_id,
+      branch_id: self.branch_id,
+      attended_by: self.attended_by,
+      profile: self.profile.as_json
     }
     broadcast_pusher('attendance_channel', 'attendance', data)
   end
