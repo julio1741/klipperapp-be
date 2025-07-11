@@ -15,7 +15,6 @@ class Attendance < ApplicationRecord
   has_many :child_attendances, class_name: "Attendance", foreign_key: :parent_attendance_id, dependent: :nullify
 
   before_create :generate_nid
-  after_create :set_attended_by
   validate :unique_profile_per_day_pending_processing, on: :create
 
   # update user list after destroy
