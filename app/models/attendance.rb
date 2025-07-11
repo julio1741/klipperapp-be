@@ -89,7 +89,7 @@ class Attendance < ApplicationRecord
       self.attended_by = user.id if user
     end
     Rails.logger.info "Setting attended_by_user for attendance #{self.id} to user #{self.attended_by}"
-    Rails.logger.info "may_start_working?: #{self.attended_by_user.may_start_working}"
+    Rails.logger.info "may_start_working?: #{self.attended_by_user.may_start_working?}"
     self.attended_by_user.start_working! if self.attended_by_user.may_start_working?
     data = {
       id: self.id,

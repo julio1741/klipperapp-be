@@ -26,11 +26,11 @@ class UserQueueService
   def queue
     user_ids = @redis.lrange(@cache_key, 0, -1).map(&:to_i)
     order_user_ids = @redis.lrange(@order_cache_key, 0, -1).map(&:to_i)
-    
+
     if user_ids.empty? || order_user_ids.empty?
       user_ids = build_queue
     end
-    
+
     load_users(user_ids)
   end
 
@@ -50,7 +50,7 @@ class UserQueueService
 
     pending_counts = load_pending_counts(available_user_ids)
     users = load_users(available_user_ids)
-    
+
     users.min_by { |u| [pending_counts[u.id] || 0, queue_position(u.id)] }
   end
 
@@ -97,7 +97,7 @@ class UserQueueService
       multi.rpush(@cache_key, user_ids) if user_ids.present?
       multi.rpush(@order_cache_key, user_ids) if user_ids.present?
     end
-    
+
     set_expiry
     user_ids
   end
