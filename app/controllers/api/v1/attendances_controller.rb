@@ -46,14 +46,32 @@ module Api
 
       # GET /api/v1/attendances/history
       def history
-        yesterday = Time.now.in_time_zone('America/Santiago').beginning_of_day
+        # Si vienen year, month, day, filtramos por esos valores
+        year = params[:year]&.to_i
+        month = params[:month]&.to_i
+        day = params[:day]&.to_i
         sort = params[:sort] || 'created_at'
         dir = params[:dir] || 'desc'
-        @attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
+
+        attendances = (@filtered_records || Attendance.includes(:attended_by_user, :profile, :service))
           .where(status: [:completed, :finished, :canceled])
-          .where("created_at <= ?", yesterday)
-          .order("#{sort} #{dir}")
-        render json: @attendances.map { |attendance|
+
+        if year && year > 0
+          attendances = attendances.where("EXTRACT(YEAR FROM created_at) = ?", year)
+        end
+        if month && month > 0
+          attendances = attendances.where("EXTRACT(MONTH FROM created_at) = ?", month)
+        end
+        if day && day > 0
+          attendances = attendances.where("EXTRACT(DAY FROM created_at) = ?", day)
+        end
+
+        yesterday = Time.now.in_time_zone('America/Santiago').beginning_of_day
+        attendances = attendances.where("created_at <= ?", yesterday)
+
+        attendances = attendances.order("{sort} {dir}")
+
+        render json: attendances.map { |attendance|
           attendance.as_json(include: {
             attended_by_user: {},
             profile: {},
