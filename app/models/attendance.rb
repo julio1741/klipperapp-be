@@ -58,14 +58,15 @@ class Attendance < ApplicationRecord
   end
 
   def send_message_to_frontend
-    self.reload
+    # Forzamos a recargar el objeto y refrescar el status desde la base de datos
+    fresh = Attendance.find(self.id)
     data = {
-      id: self.id,
-      status: self.status,
-      organization_id: self.organization_id,
-      branch_id: self.branch_id,
-      attended_by: self.attended_by,
-      profile: self.profile.as_json
+      id: fresh.id,
+      status: fresh.status,
+      organization_id: fresh.organization_id,
+      branch_id: fresh.branch_id,
+      attended_by: fresh.attended_by,
+      profile: fresh.profile.as_json
     }
     broadcast_pusher('attendance_channel', 'attendance', data)
   end
@@ -215,6 +216,7 @@ class Attendance < ApplicationRecord
       attended_by_user.start_attendance!
     end
 
+    self.reload # Asegura que el status esté actualizado tras la transición
     send_message_to_frontend
   end
 end
