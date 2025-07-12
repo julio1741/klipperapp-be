@@ -28,11 +28,6 @@ class UserQueueService
   def queue
     user_ids = @redis.lrange(@cache_key, 0, -1).map(&:to_i)
     order_user_ids = @redis.lrange(@order_cache_key, 0, -1).map(&:to_i)
-
-    #if user_ids.empty? || order_user_ids.empty?
-    #  user_ids = build_queue
-    #end
-
     load_users(user_ids)
   end
 
