@@ -68,7 +68,6 @@ class UserQueueService
   # ATOMIC: Removes a user from both queues.
   def remove(user)
     @redis.lrem(@cache_key, 0, user.id)
-    @redis.lrem(@order_cache_key, 0, user.id)
   end
 
   # ATOMIC: Moves a user who just finished a service to the end of the queue.

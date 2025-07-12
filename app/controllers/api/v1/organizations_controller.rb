@@ -47,7 +47,14 @@ module Api
       def clean
         Attendance.cancel_old_pending_attendances
         User.set_users_stand_by
-        Rails.cache.clear
+        # Limpiar claves de redis de las colas del día
+        tz = Time.current.in_time_zone('America/Santiago').to_date
+        if $redis
+          pattern = "*queue:org:*:branch:*:*"
+          keys = $redis.keys(pattern)
+          $redis.del(*keys) unless keys.empty?
+        end
+
         render json: { message: 'Entities cleaned successfully' }, status: :ok
       end
 
