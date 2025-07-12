@@ -34,6 +34,11 @@ class UserQueueService
     load_users(user_ids)
   end
 
+    def order_queue
+    order_user_ids = @redis.lrange(@order_cache_key, 0, -1).map(&:to_i)
+    load_users(user_ids)
+  end
+
   def load_users(user_ids)
     return [] if user_ids.empty?
     users = User.where(id: user_ids).index_by(&:id)
