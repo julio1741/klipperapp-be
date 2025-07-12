@@ -52,9 +52,6 @@ class UserQueueService
     user_ids = @redis.lrange(@order_cache_key, 0, -1).map(&:to_i)
     return nil if user_ids.blank?
 
-    available_user_ids = User.where(id: user_ids, work_state: :available).pluck(:id)
-    return nil if available_user_ids.blank?
-
     pending_counts = load_pending_counts(available_user_ids)
     users = load_users(available_user_ids)
 
