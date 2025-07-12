@@ -176,9 +176,12 @@ class Attendance < ApplicationRecord
 
   def generate_nid
     today = Time.now.in_time_zone('America/Santiago').to_date
-    attendance = Attendance.where("DATE(created_at) = ?", today).order(created_at: :desc).last
-    last_nid = attendance&.nid&.match(/\d+/)&.to_s&.to_i
-    next_number = last_nid ? last_nid + 1 : 1
+    nids = Attendance.where("DATE(created_at) = ?", today)
+      .where.not(nid: nil)
+      .pluck(:nid)
+      .map { |nid| nid[1..-1].to_i }
+    last_number = nids.max
+    next_number = last_number ? last_number + 1 : 1
     self.nid = "A#{next_number.to_s.rjust(3, '0')}"
   end
 
