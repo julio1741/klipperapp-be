@@ -16,6 +16,7 @@ class Attendance < ApplicationRecord
 
   before_create :generate_nid
   validate :unique_profile_per_day_pending_processing, on: :create
+  after_create :send_wsp_message
 
   # update user list after destroy
 
@@ -223,4 +224,20 @@ class Attendance < ApplicationRecord
 
     self.reload # Asegura que el status esté actualizado tras la transición
   end
+
+  def send_wsp_message
+    return unless attended_by_user && profile && organization
+
+    body = {
+      user_name: attended_by_user.name,
+      profile_name: profile.name,
+      organization_name: organization.name
+    }
+
+    TwilioMessageService.new(
+      from: Rails.application.credentials.twilio_phone_number,
+      to: profile.phone_number
+    ).send_message(body)
+  end
+
 end
