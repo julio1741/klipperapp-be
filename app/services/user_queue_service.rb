@@ -12,12 +12,14 @@ class UserQueueService
 
   # ATOMIC: Adds a user to the end of the queue if they are not already present.
   def add_user_to_queue(user)
+    Rails.logger.info "Adding add_user_to_queue user #{user.name}-#{user.id} to queue #{@cache_key}"
     @redis.rpush(@cache_key, user.id) unless user_in_queue?(user.id)
     set_expiry
   end
 
   # ATOMIC: Adds a user to the end of the order queue if they are not already present.
   def add_user_to_order_queue(user)
+    Rails.logger.info "Adding add_user_to_order_queue user #{user.name}-#{user.id} to order queue #{@order_cache_key}"
     @redis.rpush(@order_cache_key, user.id) unless user_in_order_queue?(user.id)
     set_expiry
   end
@@ -27,9 +29,9 @@ class UserQueueService
     user_ids = @redis.lrange(@cache_key, 0, -1).map(&:to_i)
     order_user_ids = @redis.lrange(@order_cache_key, 0, -1).map(&:to_i)
 
-    if user_ids.empty? || order_user_ids.empty?
-      user_ids = build_queue
-    end
+    #if user_ids.empty? || order_user_ids.empty?
+    #  user_ids = build_queue
+    #end
 
     load_users(user_ids)
   end
@@ -72,15 +74,8 @@ class UserQueueService
 
   # ATOMIC: Removes a user from both queues.
   def remove(user)
+    Rails.logger.info "Removing user #{user.name}-#{user.id} from queue #{@cache_key}"
     @redis.lrem(@cache_key, 0, user.id)
-  end
-
-  # ATOMIC: Moves a user who just finished a service to the end of the queue.
-  def rotate(user)
-    # Remove from anywhere in the list, then add to the end.
-    @redis.lrem(@cache_key, 0, user.id)
-    @redis.rpush(@cache_key, user.id)
-    set_expiry
   end
 
   # ATOMIC: Creates the initial queue ordered by arrival time.
