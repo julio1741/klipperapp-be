@@ -52,8 +52,8 @@ class UserQueueService
     user_ids = @redis.lrange(@order_cache_key, 0, -1).map(&:to_i)
     return nil if user_ids.blank?
 
-    pending_counts = load_pending_counts(available_user_ids)
-    users = load_users(available_user_ids)
+    pending_counts = load_pending_counts(user_ids)
+    users = load_users(user_ids)
 
     users.min_by { |u| [pending_counts[u.id] || 0, queue_position(u.id)] }
   end
